@@ -16,8 +16,7 @@
     <!-- アイコン定義（線の太さをそろえたシンプルな線画） -->
     <svg width="0" height="0" class="sprite" aria-hidden="true">
         <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
-        <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M12 11v6M9 14l3 3 3-3"/></symbol>
-        <symbol id="i-list" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/></symbol>
+                <symbol id="i-list" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/></symbol>
         <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M4 16l5-5 4 3 7-7"/><path d="M16 7h4v4"/></symbol>
         <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
         <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
@@ -34,6 +33,9 @@
         <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6l8.5 7 8.5-7"/></symbol>
         <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></symbol>
         <symbol id="i-school" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5M22 9v6"/></symbol>
+        <symbol id="i-login" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M13 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/></symbol>
+        <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></symbol>
+        <symbol id="i-infinity" viewBox="0 0 24 24"><path d="M12 12c-2-2.7-3.6-4-5.5-4a4 4 0 0 0 0 8c1.9 0 3.5-1.3 5.5-4zm0 0c2 2.7 3.6 4 5.5 4a4 4 0 0 0 0-8c-1.9 0-3.5 1.3-5.5 4z"/></symbol>
         <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M5 15c-1.5 1.2-2 5-2 5s3.8-.5 5-2c.7-.8.7-2.1-.1-2.9a2.1 2.1 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-4A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22 22 0 0 1-4 2z"/><path d="M9 12H4s.5-3 2-4c1.6-1.1 3 0 3 0M12 15v5s3-.5 4-2c1.1-1.6 0-3 0-3"/></symbol>
     </svg>
 
@@ -51,12 +53,17 @@
                 <a href="#problems">課題と解決</a>
                 <a href="#features">主要機能</a>
                 <a href="#roles">権限ロール</a>
+                <a href="#pricing">料金プラン</a>
                 <a href="#flow">導入の流れ</a>
             </nav>
-            <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-blue btn-sm header-cta">
-                <span>お問い合わせ<span class="hide-sp">・資料請求</span></span>
-                <svg class="icon"><use href="#i-arrow-right"/></svg>
-            </a>
+            <div class="header-actions">
+                <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-white btn-sm header-contact">
+                    <span>お問い合わせ</span>
+                </a>
+                <a href="login.html" class="pop-btn btn-blue btn-sm header-login">
+                    <svg class="icon"><use href="#i-login"/></svg><span>ログイン</span>
+                </a>
+            </div>
         </div>
     </header>
 
@@ -77,10 +84,10 @@
                     </p>
                     <div class="hero-actions">
                         <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-red">
-                            <span>資料請求・導入のご相談</span><svg class="icon"><use href="#i-doc"/></svg>
+                            <span>導入のご相談・お問い合わせ</span><svg class="icon"><use href="#i-arrow-right"/></svg>
                         </a>
-                        <a href="#features" class="pop-btn btn-white">
-                            <span>主要機能を見る</span><svg class="icon"><use href="#i-list"/></svg>
+                        <a href="#pricing" class="pop-btn btn-white">
+                            <span>料金プランを見る</span><svg class="icon"><use href="#i-list"/></svg>
                         </a>
                     </div>
                     <div class="hero-metrics">
@@ -99,35 +106,18 @@
                     </div>
                 </div>
 
-                <!-- 画面のイメージ -->
+                <!-- 3Dのオブジェクト（ゆっくり回るキューブ） -->
                 <div class="hero-visual" aria-hidden="true">
-                    <div class="mock pop-card">
-                        <span class="mock-sticker">HIGH PERFORMANCE ★</span>
-                        <div class="mock-head">
-                            <span class="mock-icon bg-cyan"><svg class="icon"><use href="#i-chart"/></svg></span>
-                            <div>
-                                <p class="mock-kicker">校内進捗ダッシュボード</p>
-                                <p class="mock-title">CAREER MONITOR</p>
-                            </div>
-                            <span class="mock-alert">次回面接アラート</span>
+                    <div class="cube-scene">
+                        <div class="cube">
+                            <div class="cube-face face-front"><img src="img/logo.png" alt="" width="96" height="110"></div>
+                            <div class="cube-face face-right bg-yellow"><svg class="icon"><use href="#i-school"/></svg><span>STUDENTS</span></div>
+                            <div class="cube-face face-back bg-cyan"><svg class="icon"><use href="#i-briefcase"/></svg><span>ENTRY</span></div>
+                            <div class="cube-face face-left bg-pink c-white"><svg class="icon"><use href="#i-calendar"/></svg><span>REMIND</span></div>
+                            <div class="cube-face face-top bg-blue c-white"><svg class="icon"><use href="#i-chart"/></svg><span>MONITOR</span></div>
+                            <div class="cube-face face-bottom bg-red c-white"><svg class="icon"><use href="#i-check-circle"/></svg><span>SUCCESS</span></div>
                         </div>
-                        <div class="mock-item bg-amber">
-                            <div>
-                                <span class="chip bg-blue">二次面接（直近3日以内）</span>
-                                <p class="mock-who">IT学科2年 - 山田 太郎</p>
-                                <p class="mock-co">株式会社サイバーソリューションズ</p>
-                            </div>
-                            <span class="mock-dot bg-yellow"><svg class="icon"><use href="#i-arrow-right"/></svg></span>
-                        </div>
-                        <div class="mock-item bg-rose">
-                            <div>
-                                <span class="chip bg-red">最終面接完了・結果待ち</span>
-                                <p class="mock-who">Webデザイン科1年 - 鈴木 花子</p>
-                                <p class="mock-co">合同会社イノベーションラボ</p>
-                            </div>
-                            <span class="mock-dot bg-cyan"><svg class="icon"><use href="#i-check-circle"/></svg></span>
-                        </div>
-                        <p class="mock-foot"><span><svg class="icon"><use href="#i-lock"/></svg>SECURE ACCESS CONTROL ACTIVE</span></p>
+                        <div class="cube-shadow"></div>
                     </div>
                 </div>
             </div>
@@ -270,8 +260,57 @@
             </div>
         </section>
 
+        <!-- ================= 料金プラン ================= -->
+        <section class="section" id="pricing">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-badge bg-pink c-white">PRICING</span>
+                    <h2 class="section-title">料金プラン</h2>
+                    <p class="section-lead">学校の運用に合わせて、2つのプランからお選びいただけます。どちらのプランでも、すべての機能をお使いいただけます。</p>
+                </div>
+
+                <div class="plans">
+                    <article class="plan pop-card">
+                        <div class="plan-head bg-cyan">
+                            <span class="plan-icon"><svg class="icon"><use href="#i-repeat"/></svg></span>
+                            <div>
+                                <p class="plan-kicker">SUBSCRIPTION</p>
+                                <h3 class="plan-name">サブスクプラン</h3>
+                            </div>
+                        </div>
+                        <p class="plan-price"><span class="plan-yen">¥</span>9,900<span class="plan-unit">／月</span></p>
+                        <p class="plan-desc">月ごとのお支払いで、はじめやすいプランです。</p>
+                        <ul class="plan-list">
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>すべての機能が使える</li>
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>学校専用の環境をご用意</li>
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>月ごとのお支払い</li>
+                        </ul>
+                        <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-white plan-btn"><span>このプランで相談する</span><svg class="icon"><use href="#i-arrow-right"/></svg></a>
+                    </article>
+
+                    <article class="plan pop-card">
+                        <div class="plan-head bg-yellow">
+                            <span class="plan-icon"><svg class="icon"><use href="#i-infinity"/></svg></span>
+                            <div>
+                                <p class="plan-kicker">ONE-TIME PURCHASE</p>
+                                <h3 class="plan-name">買い切りプラン</h3>
+                            </div>
+                        </div>
+                        <p class="plan-price"><span class="plan-yen">¥</span>110,000<span class="plan-unit">／買い切り</span></p>
+                        <p class="plan-desc">一度のお支払いで、長くお使いいただけるプランです。</p>
+                        <ul class="plan-list">
+                            <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>すべての機能が使える</li>
+                            <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>学校専用の環境をご用意</li>
+                            <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>月々のお支払いなし</li>
+                        </ul>
+                        <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-red plan-btn"><span>このプランで相談する</span><svg class="icon"><use href="#i-arrow-right"/></svg></a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
         <!-- ================= 導入の流れ ================= -->
-        <section class="section" id="flow">
+        <section class="section section-white" id="flow">
             <div class="container">
                 <div class="section-head">
                     <span class="section-badge bg-yellow">HOW TO START</span>
@@ -284,7 +323,7 @@
                         <span class="flow-no">01</span>
                         <span class="flow-icon bg-cyan"><svg class="icon"><use href="#i-mail"/></svg></span>
                         <h3>お問い合わせ</h3>
-                        <p>お問い合わせフォームから、資料請求や導入のご相談をお送りください。</p>
+                        <p>お問い合わせフォームから、導入のご相談やご質問をお送りください。</p>
                     </li>
                     <li class="flow-step pop-card">
                         <span class="flow-no">02</span>
@@ -311,11 +350,11 @@
         <!-- ================= CTA ================= -->
         <section class="cta" id="contact">
             <div class="container cta-inner">
-                <span class="section-badge bg-red">INQUIRY &amp; DOCUMENT REQUEST</span>
+                <span class="section-badge bg-red">CONTACT</span>
                 <h2 class="cta-title">R-eadership で<br>就職進路指導を次のステージへ。</h2>
-                <p class="cta-lead">製品資料のご請求、導入時期のご相談、オンラインでの個別のご説明をご希望の専門学校様は、お問い合わせフォームからお気軽にご連絡ください。</p>
+                <p class="cta-lead">導入時期のご相談や、オンラインでの個別のご説明をご希望の専門学校様は、お問い合わせフォームからお気軽にご連絡ください。</p>
                 <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-red btn-lg">
-                    <span>お問い合わせ・資料請求はこちら</span><svg class="icon"><use href="#i-arrow-right"/></svg>
+                    <span>お問い合わせはこちら</span><svg class="icon"><use href="#i-arrow-right"/></svg>
                 </a>
                 <p class="cta-note">お問い合わせは、R-SERIES 共通のお問い合わせフォームで受け付けています。</p>
             </div>
@@ -340,13 +379,15 @@
                         <li><a href="#problems">課題と解決</a></li>
                         <li><a href="#features">主要機能</a></li>
                         <li><a href="#roles">権限ロール</a></li>
+                        <li><a href="#pricing">料金プラン</a></li>
                         <li><a href="#flow">導入の流れ</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <p class="footer-head">INFORMATION</p>
                     <ul>
-                        <li><a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact">お問い合わせ・資料請求</a></li>
+                        <li><a href="login.html">ログイン</a></li>
+                        <li><a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact">お問い合わせ</a></li>
                     </ul>
                 </div>
             </div>
