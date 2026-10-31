@@ -1,0 +1,58 @@
+/* R-eadership 共通ローディング（js/loading.js と組で使う） */
+.rl-loading {
+    position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none;
+    margin: 0; padding: 0; border: none; background: transparent;
+    display: none; place-items: center;
+}
+.rl-loading[open] { display: grid; animation: rl-in 0.2s ease both; }
+.rl-loading.is-leaving { animation: rl-out 0.2s ease both; }
+.rl-loading::backdrop { background: rgba(255, 248, 231, 0.88); backdrop-filter: blur(3px); }
+@keyframes rl-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rl-out { from { opacity: 1; } to { opacity: 0; } }
+
+.rl-box { display: flex; flex-direction: column; align-items: center; padding: 16px; text-align: center; }
+
+/* 回るキューブ */
+.rl-scene { --s: 84px; position: relative; width: var(--s); height: var(--s); margin-bottom: 44px; perspective: 600px; animation: rl-float 1.6s ease-in-out infinite; }
+.rl-cube { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: rl-spin 2.4s cubic-bezier(0.6, 0, 0.4, 1) infinite; }
+.rl-face {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    border: 4px solid #1E1B18; border-radius: 6px;
+    box-shadow: inset -6px -6px 0 rgba(30, 27, 24, 0.12);
+    backface-visibility: hidden;
+}
+.rl-face img { width: 52%; height: auto; }
+.rl-front  { transform: translateZ(calc(var(--s) / 2)); background: #fff; }
+.rl-back   { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); background: #00F0FF; }
+.rl-right  { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); background: #FFDE00; }
+.rl-left   { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); background: #FF007A; }
+.rl-top    { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); background: #2B50FF; }
+.rl-bottom { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); background: #FF2A54; }
+.rl-shadow {
+    position: absolute; left: 50%; bottom: -36px; width: 110%; height: 16px;
+    transform: translateX(-50%); border-radius: 50%;
+    background: rgba(30, 27, 24, 0.22); filter: blur(4px);
+    animation: rl-shadow 1.6s ease-in-out infinite;
+}
+@keyframes rl-spin {
+    0%   { transform: rotateX(-22deg) rotateY(-35deg); }
+    50%  { transform: rotateX(-22deg) rotateY(145deg); }
+    100% { transform: rotateX(-22deg) rotateY(325deg); }
+}
+@keyframes rl-float { 50% { translate: 0 -10px; } }
+@keyframes rl-shadow { 50% { transform: translateX(-50%) scale(0.8); opacity: 0.6; } }
+
+/* 文字 */
+.rl-title { font-family: 'Bungee', 'Fredoka', sans-serif; font-size: 1.35rem; letter-spacing: 0.06em; color: #1E1B18; line-height: 1.2; }
+.rl-dots i { display: inline-block; font-style: normal; animation: rl-dot 1.2s ease-in-out infinite; }
+.rl-dots i:nth-child(2) { animation-delay: 0.15s; }
+.rl-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes rl-dot { 0%, 60%, 100% { opacity: 0.2; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+.rl-text { margin-top: 8px; font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 0.9rem; font-weight: 800; color: #4B4540; }
+.rl-text:empty { display: none; }
+
+/* 動きを減らす設定の人には、ゆっくり回す */
+@media (prefers-reduced-motion: reduce) {
+    .rl-cube { animation-duration: 8s; animation-timing-function: linear; }
+    .rl-scene, .rl-shadow, .rl-dots i { animation: none; }
+}

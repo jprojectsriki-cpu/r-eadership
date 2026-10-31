@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600;700&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/lp.css">
+    <link rel="stylesheet" href="css/loading.css">
 </head>
 <body>
     <svg width="0" height="0" class="sprite" aria-hidden="true">
@@ -29,12 +30,6 @@
     </header>
 
     <main class="soon-page">
-        <!-- ログイン状態を確認しているあいだ -->
-        <section class="soon-card pop-card" id="checkCard">
-            <span class="section-badge bg-blue c-white">LOGIN</span>
-            <p>ログイン状態を確認しています…</p>
-        </section>
-
         <!-- ログイン -->
         <section class="soon-card login-card pop-card" id="loginCard" hidden>
             <span class="section-badge bg-blue c-white">LOGIN</span>
@@ -77,6 +72,7 @@
         </section>
     </main>
 
+    <script src="js/loading.js"></script>
     <script src="js/schools.js"></script>
     <script src="js/login.js"></script>
 </body>

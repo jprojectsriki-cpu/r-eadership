@@ -11,6 +11,7 @@
     var TOKEN_KEY = 'readership_token';
     var SCHOOL_KEY = 'readership_school';
     var NG_MESSAGE = '学校コード、教員ID、またはパスワードが正しくありません。';
+    var Loader = window.RLoading;
 
     function $(id) { return document.getElementById(id); }
     function store(key, value) {
@@ -41,14 +42,9 @@
         el.textContent = text || '';
         el.hidden = !text;
     }
-    function setBusy(btn, busy, label) {
-        btn.disabled = busy;
-        btn.querySelector('span').textContent = label;
-    }
 
     /* ---------- 表示の切り替え ---------- */
     function showLogin() {
-        $('checkCard').hidden = true;
         $('doneCard').hidden = true;
         $('loginCard').hidden = false;
     }
@@ -56,7 +52,6 @@
         $('doneSchool').textContent = user.schoolName + '（' + user.schoolCode + '）';
         $('doneName').textContent = user.name + '（' + user.teacherId + '）';
         $('doneRole').textContent = user.role === 'admin' ? '学校管理者' : '教員';
-        $('checkCard').hidden = true;
         $('loginCard').hidden = true;
         $('doneCard').hidden = false;
         // ※ ダッシュボード（L-5〜）ができたら、ここで移動する
@@ -94,8 +89,8 @@
             if (!url) return setMsg(NG_MESSAGE, true);
 
             setMsg('');
-            setBusy(btn, true, 'ログインしています…');
-            apiPost(url, { action: 'login', schoolCode: code, teacherId: id, password: pw })
+            btn.disabled = true;
+            Loader.wrap('ログインしています', apiPost(url, { action: 'login', schoolCode: code, teacherId: id, password: pw }))
                 .then(function (res) {
                     if (res && res.ok) {
                         store(TOKEN_KEY, res.token);
@@ -111,16 +106,18 @@
                     console.error(err);
                     setMsg('通信に失敗しました。時間をおいてもう一度お試しください。', true);
                 })
-                .then(function () { setBusy(btn, false, 'ログイン'); });
+                .then(function () { btn.disabled = false; });
         });
 
         $('logoutBtn').addEventListener('click', function () {
             var token = load(TOKEN_KEY);
             var url = apiUrl(load(SCHOOL_KEY));
             store(TOKEN_KEY, '');
-            showLogin();
-            setMsg('ログアウトしました。');
-            if (token && url) apiPost(url, { action: 'logout', token: token }).catch(function () {});
+            var done = function () { showLogin(); setMsg('ログアウトしました。'); };
+            if (!token || !url) { done(); return; }
+            Loader.wrap('ログアウトしています', apiPost(url, { action: 'logout', token: token }))
+                .catch(function () { /* 画面ではログアウト済みにする */ })
+                .then(done);
         });
     }
 
@@ -135,7 +132,7 @@
         if (!token || !url) { showLogin(); return; }
 
         // すでにログインしているかを確認する
-        apiPost(url, { action: 'me', token: token })
+        Loader.wrap('ログイン状態を確認しています', apiPost(url, { action: 'me', token: token }))
             .then(function (res) {
                 if (res && res.ok) { showDone(res.user); return; }
                 store(TOKEN_KEY, '');
