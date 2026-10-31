@@ -29,6 +29,12 @@ function doPost(e) {
     switch (req.action) {
       case 'ping':
         return json_({ ok: true, school: getSchoolInfo_().name });
+      case 'login':
+        return json_(login_(req.schoolCode, req.teacherId, req.password));
+      case 'logout':
+        return json_(logout_(req.token));
+      case 'me':
+        return json_(checkSession_(req.token));
       default:
         return json_({ ok: false, message: '不明な操作です。' });
     }
