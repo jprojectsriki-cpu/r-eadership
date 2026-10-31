@@ -34,6 +34,7 @@
         <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></symbol>
         <symbol id="i-school" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5M22 9v6"/></symbol>
         <symbol id="i-login" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M13 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/></symbol>
+        <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></symbol>
         <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
         <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M5 15c-1.5 1.2-2 5-2 5s3.8-.5 5-2c.7-.8.7-2.1-.1-2.9a2.1 2.1 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-4A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22 22 0 0 1-4 2z"/><path d="M9 12H4s.5-3 2-4c1.6-1.1 3 0 3 0M12 15v5s3-.5 4-2c1.1-1.6 0-3 0-3"/></symbol>
     </svg>
@@ -265,7 +266,7 @@
                 <div class="section-head">
                     <span class="section-badge bg-pink c-white">PRICING</span>
                     <h2 class="section-title">料金プラン</h2>
-                    <p class="section-lead">学校の学生数（在籍している学生の人数）に合わせて、3つのプランからお選びいただけます。どのプランも<strong>買い切り</strong>で、すべての機能をお使いいただけます。価格はすべて税込です。</p>
+                    <p class="section-lead">学校の学生数（在籍している学生の人数）に合わせて、3つのプランからお選びいただけます。どのプランも<strong>買い切り</strong>で、すべての機能をお使いいただけます。価格はすべて税込です。お支払いは銀行振込です。</p>
                 </div>
 
                 <div class="plans">
@@ -284,7 +285,7 @@
                             <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>すべての機能が使える</li>
                             <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>学校専用の環境をご用意</li>
                         </ul>
-                        <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-white plan-btn"><span>このプランで相談する</span><svg class="icon"><use href="#i-arrow-right"/></svg></a>
+                        <button type="button" class="pop-btn btn-red plan-btn" data-apply="small"><span>このプランで申し込む</span><svg class="icon"><use href="#i-arrow-right"/></svg></button>
                     </article>
 
                     <article class="plan pop-card">
@@ -302,7 +303,7 @@
                             <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>すべての機能が使える</li>
                             <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>学校専用の環境をご用意</li>
                         </ul>
-                        <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-white plan-btn"><span>このプランで相談する</span><svg class="icon"><use href="#i-arrow-right"/></svg></a>
+                        <button type="button" class="pop-btn btn-red plan-btn" data-apply="medium"><span>このプランで申し込む</span><svg class="icon"><use href="#i-arrow-right"/></svg></button>
                     </article>
 
                     <article class="plan pop-card">
@@ -320,7 +321,7 @@
                             <li><svg class="icon c-pink"><use href="#i-check-circle"/></svg>すべての機能が使える</li>
                             <li><svg class="icon c-pink"><use href="#i-check-circle"/></svg>学校専用の環境をご用意</li>
                         </ul>
-                        <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-white plan-btn"><span>このプランで相談する</span><svg class="icon"><use href="#i-arrow-right"/></svg></a>
+                        <button type="button" class="pop-btn btn-red plan-btn" data-apply="large"><span>このプランで申し込む</span><svg class="icon"><use href="#i-arrow-right"/></svg></button>
                     </article>
                 </div>
             </div>
@@ -416,6 +417,59 @@
     </footer>
 
     <!-- ================= DIALOGS ================= -->
+
+
+    <!-- お申し込み -->
+    <dialog class="modal" id="applyDialog" aria-labelledby="applyTitle">
+        <form class="modal-box" id="applyForm" novalidate>
+            <div class="modal-head">
+                <h2 id="applyTitle">お申し込み</h2>
+                <button type="button" class="modal-close" data-close aria-label="閉じる"><svg class="icon"><use href="#i-close"/></svg></button>
+            </div>
+
+            <fieldset class="field-group">
+                <legend><span class="step-no">01</span><span>プラン（学生数）</span></legend>
+                <div class="plan-select">
+                    <label><input type="radio" name="plan" value="small"><span><b>〜199人</b>¥22,000</span></label>
+                    <label><input type="radio" name="plan" value="medium"><span><b>200〜499人</b>¥55,000</span></label>
+                    <label><input type="radio" name="plan" value="large"><span><b>500人以上</b>¥88,000</span></label>
+                </div>
+                <p class="note-small">価格はすべて税込・買い切りです。</p>
+            </fieldset>
+
+            <fieldset class="field-group">
+                <legend><span class="step-no">02</span><span>学校の情報</span></legend>
+                <label class="field"><span>学校名 <em class="req">必須</em></span><input type="text" name="schoolName" maxlength="100" autocomplete="organization" placeholder="例：○○専門学校" required></label>
+                <label class="field"><span>在籍している学生の人数 <em class="req">必須</em></span><input type="number" name="students" min="1" max="99999" inputmode="numeric" placeholder="例：180" required></label>
+                <p class="note-small" id="planHint" aria-live="polite"></p>
+                <div class="field-row">
+                    <label class="field"><span>郵便番号 <em class="req">必須</em></span><input type="text" name="zip" maxlength="8" inputmode="numeric" autocomplete="postal-code" placeholder="例：902-0062" required></label>
+                    <label class="field field-grow"><span>所在地 <em class="req">必須</em></span><input type="text" name="address" maxlength="200" autocomplete="street-address" placeholder="例：沖縄県那覇市○○ 1-2-3" required></label>
+                </div>
+            </fieldset>
+
+            <fieldset class="field-group">
+                <legend><span class="step-no">03</span><span>ご担当者</span></legend>
+                <div class="field-row">
+                    <label class="field field-grow"><span>お名前 <em class="req">必須</em></span><input type="text" name="name" maxlength="50" autocomplete="name" placeholder="例：山田 太郎" required></label>
+                    <label class="field field-grow"><span>部署・役職 <em>任意</em></span><input type="text" name="department" maxlength="100" placeholder="例：就職対策室" autocomplete="organization-title"></label>
+                </div>
+                <label class="field"><span>メールアドレス <em class="req">必須</em></span><input type="email" name="email" maxlength="200" autocomplete="email" placeholder="example@school.ac.jp" required></label>
+                <label class="field"><span>電話番号 <em class="req">必須</em></span><input type="tel" name="tel" maxlength="20" autocomplete="tel" placeholder="例：098-000-0000" required></label>
+                <p class="note-small">メールアドレスには、お申し込みの受付と請求書をお送りします（ログインには使いません）。</p>
+            </fieldset>
+
+            <div class="pay-note">
+                <svg class="icon"><use href="#i-bank"/></svg>
+                <p><b>お支払いは銀行振込です。</b>お申し込みのあと、請求書をメールでお送りします。ご入金を確認したのち、学校専用の環境をご用意し、学校コードと学校管理者のアカウントを発行します。</p>
+            </div>
+
+            <label class="agree"><input type="checkbox" name="agree" required><span><button type="button" class="text-link" data-open="termsDialog">利用規約</button>と<button type="button" class="text-link" data-open="privacyDialog">プライバシーポリシー</button>に同意する</span></label>
+
+            <p class="form-msg" id="applyMsg" role="status" aria-live="polite"></p>
+            <button type="submit" class="pop-btn btn-red btn-block"><span>この内容で申し込む</span><svg class="icon"><use href="#i-arrow-right"/></svg></button>
+        </form>
+    </dialog>
 
     <!-- 特定商取引法に基づく表記 -->
     <dialog class="modal" id="tokushohoDialog" aria-labelledby="tokushohoTitle">
@@ -555,6 +609,7 @@
         </div>
     </dialog>
 
+    <script src="js/config.js"></script>
     <script src="js/lp.js"></script>
 
 </body>
