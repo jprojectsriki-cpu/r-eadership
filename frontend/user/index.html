@@ -34,6 +34,7 @@
         <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></symbol>
         <symbol id="i-school" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5M22 9v6"/></symbol>
         <symbol id="i-login" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M13 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/></symbol>
+        <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
         <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M5 15c-1.5 1.2-2 5-2 5s3.8-.5 5-2c.7-.8.7-2.1-.1-2.9a2.1 2.1 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-4A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22 22 0 0 1-4 2z"/><path d="M9 12H4s.5-3 2-4c1.6-1.1 3 0 3 0M12 15v5s3-.5 4-2c1.1-1.6 0-3 0-3"/></symbol>
     </svg>
 
@@ -264,7 +265,7 @@
                 <div class="section-head">
                     <span class="section-badge bg-pink c-white">PRICING</span>
                     <h2 class="section-title">料金プラン</h2>
-                    <p class="section-lead">学校の学生数に合わせて、3つのプランからお選びいただけます。どのプランも<strong>買い切り</strong>で、すべての機能をお使いいただけます。価格はすべて税込です。</p>
+                    <p class="section-lead">学校の学生数（在籍している学生の人数）に合わせて、3つのプランからお選びいただけます。どのプランも<strong>買い切り</strong>で、すべての機能をお使いいただけます。価格はすべて税込です。</p>
                 </div>
 
                 <div class="plans">
@@ -273,13 +274,13 @@
                             <span class="plan-icon"><svg class="icon"><use href="#i-school"/></svg></span>
                             <div>
                                 <p class="plan-kicker">SMALL</p>
-                                <h3 class="plan-name">学生数 100人規模</h3>
+                                <h3 class="plan-name">学生数 〜199人</h3>
                             </div>
                         </div>
                         <p class="plan-price"><span class="plan-yen">¥</span>22,000<span class="plan-unit">（税込）</span></p>
                         <p class="plan-desc">買い切り・月々のお支払いはありません</p>
                         <ul class="plan-list">
-                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>学生数 100人規模の学校向け</li>
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>学生数 199人までの学校向け</li>
                             <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>すべての機能が使える</li>
                             <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>学校専用の環境をご用意</li>
                         </ul>
@@ -291,13 +292,13 @@
                             <span class="plan-icon"><svg class="icon"><use href="#i-school"/></svg></span>
                             <div>
                                 <p class="plan-kicker">MEDIUM</p>
-                                <h3 class="plan-name">学生数 300〜400人規模</h3>
+                                <h3 class="plan-name">学生数 200〜499人</h3>
                             </div>
                         </div>
                         <p class="plan-price"><span class="plan-yen">¥</span>55,000<span class="plan-unit">（税込）</span></p>
                         <p class="plan-desc">買い切り・月々のお支払いはありません</p>
                         <ul class="plan-list">
-                            <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>学生数 300〜400人規模の学校向け</li>
+                            <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>学生数 200〜499人の学校向け</li>
                             <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>すべての機能が使える</li>
                             <li><svg class="icon c-red"><use href="#i-check-circle"/></svg>学校専用の環境をご用意</li>
                         </ul>
@@ -402,6 +403,9 @@
                 <div class="footer-col">
                     <p class="footer-head">INFORMATION</p>
                     <ul>
+                        <li><button type="button" class="link-btn" data-open="termsDialog">利用規約</button></li>
+                        <li><button type="button" class="link-btn" data-open="privacyDialog">プライバシーポリシー</button></li>
+                        <li><button type="button" class="link-btn" data-open="tokushohoDialog">特定商取引法に基づく表記</button></li>
                         <li><a href="login.html">ログイン</a></li>
                         <li><a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact">お問い合わせ</a></li>
                     </ul>
@@ -410,6 +414,148 @@
             <p class="copyright">&copy; 2026 R-eadership / ReicherRick. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- ================= DIALOGS ================= -->
+
+    <!-- 特定商取引法に基づく表記 -->
+    <dialog class="modal" id="tokushohoDialog" aria-labelledby="tokushohoTitle">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h2 id="tokushohoTitle">特定商取引法に基づく表記</h2>
+                <button type="button" class="modal-close" data-close aria-label="閉じる"><svg class="icon"><use href="#i-close"/></svg></button>
+            </div>
+            <dl class="doc-table">
+                <dt>販売事業者名</dt><dd>ReicherRick</dd>
+                <dt>代表者の氏名</dt><dd>請求があった場合には、遅滞なく開示いたします。</dd>
+                <dt>所在地</dt><dd>〒902-0062 沖縄県那覇市字松川<br>※番地以下は、請求があった場合には、遅滞なく開示いたします。</dd>
+                <dt>電話番号・メールアドレス</dt><dd>請求があった場合には、遅滞なく開示いたします。</dd>
+                <dt>開示のご請求・お問い合わせ</dt><dd><a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" target="_blank" rel="noopener">お問い合わせフォーム</a>からご連絡ください。</dd>
+                <dt>販売価格</dt><dd>学生数 〜199人：22,000円／学生数 200〜499人：55,000円／学生数 500人以上：88,000円（いずれも税込・買い切り）</dd>
+                <dt>商品代金以外の必要料金</dt><dd>・銀行振込の手数料（お客様のご負担）<br>・インターネット接続料金および通信費用（お客様のご負担）</dd>
+                <dt>お支払い方法</dt><dd>銀行振込（お申し込み後に、請求書をお送りします）</dd>
+                <dt>代金の支払時期</dt><dd>請求書に記載の期日までにお支払いください。</dd>
+                <dt>サービスの提供時期</dt><dd>ご入金を確認したのち、学校専用の環境をご用意し、学校コードと学校管理者のアカウントを発行した時点からご利用いただけます。</dd>
+                <dt>返品・返金・キャンセル</dt><dd>アカウント発行前のキャンセルは、全額を返金いたします。ソフトウェアの特性上、アカウント発行後の返金には原則として応じられません。<br>※当方の不具合により、サービスの利用が著しく困難であると判断した場合に限り、個別に対応いたします。</dd>
+                <dt>推奨動作環境</dt><dd>最新版の Google Chrome、Microsoft Edge、Safari、Mozilla Firefox（PC・タブレット・スマートフォン）</dd>
+            </dl>
+        </div>
+    </dialog>
+
+    <!-- 利用規約 -->
+    <dialog class="modal" id="termsDialog" aria-labelledby="termsTitle">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h2 id="termsTitle">利用規約</h2>
+                <button type="button" class="modal-close" data-close aria-label="閉じる"><svg class="icon"><use href="#i-close"/></svg></button>
+            </div>
+            <div class="doc-body">
+                <p>この利用規約（以下「本規約」）は、ReicherRick（以下「当方」）が提供する就職進路管理システム「R-eadership」（以下「本サービス」）の利用条件を定めるものです。本サービスを利用する学校（以下「利用校」）は、本規約に同意したうえで本サービスを利用するものとします。</p>
+
+                <h3>第1条（適用）</h3>
+                <p>本規約は、本サービスの利用に関する当方と利用校とのすべての関係に適用されます。</p>
+
+                <h3>第2条（利用契約の成立）</h3>
+                <p>利用契約は、利用校が当方所定の方法でお申し込みを行い、当方がこれを承諾したときに成立します。当方は、申込内容に虚偽がある場合その他当方が不適当と判断した場合には、お申し込みを承諾しないことがあります。</p>
+
+                <h3>第3条（料金と支払い）</h3>
+                <p>1. 利用校は、本サービスの料金（学生数に応じたプランの買い切り料金）を、当方が発行する請求書に記載の期日までに、銀行振込で支払うものとします。振込手数料は利用校の負担とします。</p>
+                <p>2. 利用校の学生数が、選んだプランの範囲を超えることとなった場合、利用校は当方に連絡し、該当するプランとの差額を支払うものとします。</p>
+
+                <h3>第4条（提供の開始とアカウント）</h3>
+                <p>1. 当方は、入金を確認したのち、利用校専用の環境を用意し、学校コードと学校管理者のアカウントを発行します。</p>
+                <p>2. 学校管理者は、利用校の教員のアカウントを発行・停止し、教員のパスワードを設定し直すことができます。学校管理者のパスワードの再設定は、当方が行います。</p>
+                <p>3. 利用校は、学校コード、教員ID、パスワードを適切に管理し、第三者に知られないようにするものとします。これらを使って行われた操作は、利用校が行ったものとみなします。</p>
+
+                <h3>第5条（登録データの取り扱い）</h3>
+                <p>1. 利用校が本サービスに登録した学生・教員に関する情報その他のデータ（以下「登録データ」）は、利用校に帰属します。</p>
+                <p>2. 利用校は、登録データの登録にあたり、個人情報の保護に関する法律その他の法令を守り、必要な場合には本人の同意を得るなど、適切な手続きを行うものとします。</p>
+                <p>3. 当方は、本サービスの提供、保守、不具合の調査・対応のために必要な範囲でのみ登録データを取り扱い、その他の目的には使用しません。また、法令に基づく場合を除き、第三者に開示しません。</p>
+                <p>4. 登録データは、Google LLC が提供するクラウドサービス（Googleスプレッドシート等）上に保存されます。</p>
+
+                <h3>第6条（データのバックアップ）</h3>
+                <p>当方は、登録データの消失を防ぐよう努めますが、その完全性を保証するものではありません。利用校は、CSV出力機能などを使い、必要に応じて登録データの控えを保管するものとします。</p>
+
+                <h3>第7条（禁止事項）</h3>
+                <p>利用校は、次の行為をしてはなりません。</p>
+                <ul>
+                    <li>法令または公序良俗に違反する行為</li>
+                    <li>本サービスの運営を妨げる行為、または不正にアクセスする行為</li>
+                    <li>本サービスを、利用校以外の第三者に利用させ、または転売・貸与する行為</li>
+                    <li>本サービスのプログラムを複製・改変・解析する行為</li>
+                    <li>その他、当方が不適当と判断する行為</li>
+                </ul>
+
+                <h3>第8条（保守とアップデート）</h3>
+                <p>当方は、本サービスの不具合の修正に努めます。機能の追加・変更は、当方の判断で行うことがあり、その実施を約束するものではありません。</p>
+
+                <h3>第9条（サービスの停止・変更）</h3>
+                <p>当方は、保守・点検、障害、天災、利用しているクラウドサービスの停止・仕様変更その他やむを得ない事由がある場合、事前の通知なく本サービスの全部または一部を停止・変更することがあります。</p>
+
+                <h3>第10条（利用の終了）</h3>
+                <p>1. 利用校は、当方所定の方法で連絡することにより、本サービスの利用を終了できます。</p>
+                <p>2. 利用の終了にあたり、当方は、利用校の求めに応じて登録データをCSV形式でお渡ししたのち、登録データを削除します。</p>
+                <p>3. 利用校が本規約に違反した場合、当方は、事前の通知なく本サービスの利用を停止し、または利用契約を解除できるものとします。</p>
+
+                <h3>第11条（免責と損害賠償）</h3>
+                <p>1. 当方は、本サービスが利用校の特定の目的に適合すること、および不具合や中断が生じないことを保証しません。</p>
+                <p>2. 当方の責めに帰すべき事由により利用校に損害が生じた場合、当方が負う賠償責任は、直接かつ通常の損害に限り、利用校が当方に支払った料金の額を上限とします。ただし、当方に故意または重大な過失がある場合はこの限りではありません。</p>
+
+                <h3>第12条（規約の変更）</h3>
+                <p>当方は、必要と判断した場合、本規約を変更できるものとします。変更後の規約は、本サイトに掲載した時点から効力を生じます。</p>
+
+                <h3>第13条（準拠法・管轄裁判所）</h3>
+                <p>本規約は日本法に準拠します。本サービスに関して紛争が生じた場合、那覇地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
+
+                <p class="doc-date">2026年10月31日 制定</p>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- プライバシーポリシー -->
+    <dialog class="modal" id="privacyDialog" aria-labelledby="privacyTitle">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h2 id="privacyTitle">プライバシーポリシー</h2>
+                <button type="button" class="modal-close" data-close aria-label="閉じる"><svg class="icon"><use href="#i-close"/></svg></button>
+            </div>
+            <div class="doc-body">
+                <p>ReicherRick（以下「当方」）は、就職進路管理システム「R-eadership」（以下「本サービス」）における個人情報の取り扱いについて、次のとおり定めます。</p>
+
+                <h3>1. 取得する情報</h3>
+                <ul>
+                    <li>お問い合わせの際にご入力いただく、お名前・メールアドレス・お問い合わせの内容</li>
+                    <li>お申し込み・ご契約の際にお知らせいただく、学校名・ご担当者のお名前などの連絡先</li>
+                    <li>利用校が本サービスに登録する、学生・教員に関する情報（以下「登録データ」）</li>
+                </ul>
+
+                <h3>2. 利用目的</h3>
+                <ul>
+                    <li>お問い合わせへの回答、ご契約・請求に関するご連絡のため</li>
+                    <li>本サービスの提供、保守、不具合の調査・対応のため</li>
+                </ul>
+                <p>登録データは、利用校から本サービスの提供のために預かるものであり、上記以外の目的には使用しません。</p>
+
+                <h3>3. 第三者への提供</h3>
+                <p>当方は、法令に基づく場合を除き、ご本人または利用校の同意なく、個人情報を第三者に提供しません。</p>
+
+                <h3>4. 保存先と安全管理</h3>
+                <p>登録データは、Google LLC が提供するクラウドサービス（Googleスプレッドシート等）上に、利用校ごとに分けて保存します。当方は、アクセスできる人の限定、パスワードの暗号化（ハッシュ化）、権限に応じた閲覧の制限など、個人情報の漏えい・滅失・き損を防ぐための措置を講じます。</p>
+
+                <h3>5. 開示・訂正・削除のご請求</h3>
+                <p>ご本人から、個人情報の開示・訂正・削除などのご請求があった場合は、ご本人であることを確認したうえで、法令に従い対応します。登録データについては、利用校を通じてご請求ください。</p>
+
+                <h3>6. ポリシーの変更</h3>
+                <p>当方は、必要に応じて本ポリシーを変更することがあります。変更後のポリシーは、本サイトに掲載した時点から効力を生じます。</p>
+
+                <h3>7. お問い合わせ窓口</h3>
+                <p>本ポリシーに関するお問い合わせは、<a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" target="_blank" rel="noopener">お問い合わせフォーム</a>からご連絡ください。</p>
+
+                <p class="doc-date">2026年10月31日 制定</p>
+            </div>
+        </div>
+    </dialog>
+
+    <script src="js/lp.js"></script>
 
 </body>
 </html>
