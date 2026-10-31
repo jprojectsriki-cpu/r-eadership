@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R-eadership | 専門学校向け 就職進路管理システム</title>
+    <meta name="description" content="R-eadership（リーダーシップ）は、専門学校向けの就職進路管理システムです。学生ごとの選考状況をひと目で把握し、面接前の指導漏れや進路状況の集計の手間を減らします。">
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600;700&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/lp.css">
+</head>
+<body>
+
+    <!-- アイコン定義（線の太さをそろえたシンプルな線画） -->
+    <svg width="0" height="0" class="sprite" aria-hidden="true">
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
+        <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M12 11v6M9 14l3 3 3-3"/></symbol>
+        <symbol id="i-list" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/></symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M4 16l5-5 4 3 7-7"/><path d="M16 7h4v4"/></symbol>
+        <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+        <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+        <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+        <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+        <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></symbol>
+        <symbol id="i-idcard" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.3"/><path d="M5.5 16.5c.8-1.8 2-2.6 3.5-2.6s2.7.8 3.5 2.6M14.5 10h4M14.5 13.5h4"/></symbol>
+        <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 12.5h18M11 12.5v2h2v-2"/></symbol>
+        <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4"/></symbol>
+        <symbol id="i-timeline" viewBox="0 0 24 24"><path d="M6 3v18"/><circle cx="6" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><path d="M10 7h10M10 12h7M10 17h10"/></symbol>
+        <symbol id="i-csv" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 15h6M9 18h4"/></symbol>
+        <symbol id="i-usergear" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5 1.2 0 2.3.3 3.2.8"/><circle cx="17.5" cy="16.5" r="2.2"/><path d="M17.5 12.5v1.8M17.5 18.7v1.8M13.5 16.5h1.8M19.7 16.5h1.8"/></symbol>
+        <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6l8.5 7 8.5-7"/></symbol>
+        <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></symbol>
+        <symbol id="i-school" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5M22 9v6"/></symbol>
+        <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M5 15c-1.5 1.2-2 5-2 5s3.8-.5 5-2c.7-.8.7-2.1-.1-2.9a2.1 2.1 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-4A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22 22 0 0 1-4 2z"/><path d="M9 12H4s.5-3 2-4c1.6-1.1 3 0 3 0M12 15v5s3-.5 4-2c1.1-1.6 0-3 0-3"/></symbol>
+    </svg>
+
+    <!-- ================= HEADER ================= -->
+    <header class="site-header" id="top">
+        <div class="header-inner">
+            <a href="#top" class="brand" aria-label="R-eadership トップへ">
+                <span class="brand-mark"><img src="img/logo.png" alt="" width="30" height="34"></span>
+                <span class="brand-text">
+                    <span class="brand-name">R-eadership</span>
+                    <span class="brand-sub">CAREER MANAGEMENT SYSTEM</span>
+                </span>
+            </a>
+            <nav class="header-nav" aria-label="ページ内メニュー">
+                <a href="#problems">課題と解決</a>
+                <a href="#features">主要機能</a>
+                <a href="#roles">権限ロール</a>
+                <a href="#flow">導入の流れ</a>
+            </nav>
+            <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-blue btn-sm header-cta">
+                <span>お問い合わせ<span class="hide-sp">・資料請求</span></span>
+                <svg class="icon"><use href="#i-arrow-right"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- ================= HERO ================= -->
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-text">
+                    <p class="hero-badge"><svg class="icon"><use href="#i-shield"/></svg>専門学校向け 次世代就職進路管理システム</p>
+                    <h1 class="hero-title">
+                        専門学校向け<br>
+                        就職進路管理システム<br>
+                        <span class="hero-name">R-eadership</span>
+                    </h1>
+                    <p class="hero-lead">
+                        クラス担任と就職対策室（学校管理者）の連携を、もっとスムーズに。<br class="hide-sp">
+                        学生一人ひとりの選考状況をリアルタイムに見える化し、面接前の指導漏れや、進路決定状況の集計にかかる手間を減らします。
+                    </p>
+                    <div class="hero-actions">
+                        <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-red">
+                            <span>資料請求・導入のご相談</span><svg class="icon"><use href="#i-doc"/></svg>
+                        </a>
+                        <a href="#features" class="pop-btn btn-white">
+                            <span>主要機能を見る</span><svg class="icon"><use href="#i-list"/></svg>
+                        </a>
+                    </div>
+                    <div class="hero-metrics">
+                        <div class="metric">
+                            <p class="metric-label">進捗把握</p>
+                            <p class="metric-value c-red">リアルタイム</p>
+                        </div>
+                        <div class="metric">
+                            <p class="metric-label">運用区分</p>
+                            <p class="metric-value c-blue">2階層ロール</p>
+                        </div>
+                        <div class="metric">
+                            <p class="metric-label">選考アラート</p>
+                            <p class="metric-value c-pink">自動リマインド</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 画面のイメージ -->
+                <div class="hero-visual" aria-hidden="true">
+                    <div class="mock pop-card">
+                        <span class="mock-sticker">HIGH PERFORMANCE ★</span>
+                        <div class="mock-head">
+                            <span class="mock-icon bg-cyan"><svg class="icon"><use href="#i-chart"/></svg></span>
+                            <div>
+                                <p class="mock-kicker">校内進捗ダッシュボード</p>
+                                <p class="mock-title">CAREER MONITOR</p>
+                            </div>
+                            <span class="mock-alert">次回面接アラート</span>
+                        </div>
+                        <div class="mock-item bg-amber">
+                            <div>
+                                <span class="chip bg-blue">二次面接（直近3日以内）</span>
+                                <p class="mock-who">IT学科2年 - 山田 太郎</p>
+                                <p class="mock-co">株式会社サイバーソリューションズ</p>
+                            </div>
+                            <span class="mock-dot bg-yellow"><svg class="icon"><use href="#i-arrow-right"/></svg></span>
+                        </div>
+                        <div class="mock-item bg-rose">
+                            <div>
+                                <span class="chip bg-red">最終面接完了・結果待ち</span>
+                                <p class="mock-who">Webデザイン科1年 - 鈴木 花子</p>
+                                <p class="mock-co">合同会社イノベーションラボ</p>
+                            </div>
+                            <span class="mock-dot bg-cyan"><svg class="icon"><use href="#i-check-circle"/></svg></span>
+                        </div>
+                        <p class="mock-foot"><span><svg class="icon"><use href="#i-lock"/></svg>SECURE ACCESS CONTROL ACTIVE</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 課題と解決 ================= -->
+        <section class="section section-white" id="problems">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-badge bg-red">PROBLEM &amp; SOLUTION</span>
+                    <h2 class="section-title">就職指導現場の課題を解決</h2>
+                    <p class="section-lead">エクセルや紙での管理で起きていた情報の分断や集計の負担を、「R-eadership」の一元管理で解消します。</p>
+                </div>
+
+                <div class="compare">
+                    <div class="compare-card pop-card bg-cream">
+                        <div class="compare-head">
+                            <span class="compare-icon bg-red"><svg class="icon"><use href="#i-x"/></svg></span>
+                            <h3>従来の管理方法の限界</h3>
+                        </div>
+                        <ul class="compare-list">
+                            <li><svg class="icon c-red"><use href="#i-warn"/></svg><span><strong>エクセル管理の散逸・先祖返り：</strong>クラスごとにファイルが分かれ、就職対策室との全体集計に膨大な時間がかかる。</span></li>
+                            <li><svg class="icon c-red"><use href="#i-warn"/></svg><span><strong>面接直前のフォロー漏れ：</strong>学生がいつ面接を受けるのかをタイムリーに把握できず、アドバイスが間に合わない。</span></li>
+                            <li><svg class="icon c-red"><use href="#i-warn"/></svg><span><strong>引き継ぎ・指導履歴の不透明化：</strong>面接の手応えや課題感が口頭報告にとどまり、組織としての蓄積にならない。</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="compare-card pop-card bg-amber-strong">
+                        <div class="compare-head">
+                            <span class="compare-icon bg-cyan"><svg class="icon"><use href="#i-check"/></svg></span>
+                            <h3>R-eadership による解決</h3>
+                        </div>
+                        <ul class="compare-list">
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg><span><strong>リアルタイム一元データベース：</strong>担任の入力がすぐに反映。CSV出力機能で、調査・報告資料もワンクリックで出力。</span></li>
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg><span><strong>3日前選考自動リマインド：</strong>直近の選考日程をダッシュボード上部に自動で表示。事前指導を徹底できます。</span></li>
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg><span><strong>全履歴タイムライン化：</strong>応募から内定までのすべての段階と、面接指導のメモを時系列で記録。</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 主要機能 ================= -->
+        <section class="section" id="features">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-badge bg-cyan">KEY FEATURES</span>
+                    <h2 class="section-title">R-eadership の主要機能</h2>
+                    <p class="section-lead">現場の教員の入力の手間をできるだけ減らし、進路指導の精度を高める機能をそろえています。</p>
+                </div>
+
+                <div class="feature-grid">
+                    <article class="feature pop-card">
+                        <div>
+                            <span class="feature-icon bg-yellow tilt-l"><svg class="icon"><use href="#i-idcard"/></svg></span>
+                            <h3>学生名簿 ＆ 保有資格マスタ</h3>
+                            <p>学籍番号、氏名、所属クラス、取得資格を一元管理。資格の種類やクラスで絞り込めるので、条件に合う学生をすぐに探せます。</p>
+                        </div>
+                        <p class="feature-point bg-amber"><svg class="icon c-blue"><use href="#i-check"/></svg>クラス・資格による瞬時フィルタリング</p>
+                    </article>
+                    <article class="feature pop-card">
+                        <div>
+                            <span class="feature-icon bg-pink c-white tilt-r"><svg class="icon"><use href="#i-briefcase"/></svg></span>
+                            <h3>エントリー ＆ ステータス追跡</h3>
+                            <p>応募企業名、職種、選考の段階（書類送付済、一次・二次・最終面接、内定獲得）をデータで管理。最新の選考状況が、学生のステータスに自動で反映されます。</p>
+                        </div>
+                        <p class="feature-point bg-rose"><svg class="icon c-red"><use href="#i-check"/></svg>学生の最新ステータスを自動更新</p>
+                    </article>
+                    <article class="feature pop-card">
+                        <div>
+                            <span class="feature-icon bg-cyan tilt-l"><svg class="icon"><use href="#i-calendar"/></svg></span>
+                            <h3>3日前自動リマインド通知</h3>
+                            <p>3日以内に面接を控えている学生を、ダッシュボードの上部に自動でハイライト表示。事前の面接練習やアドバイスの漏れを防ぎます。</p>
+                        </div>
+                        <p class="feature-point bg-cyan-soft"><svg class="icon c-blue"><use href="#i-check"/></svg>面接スケジュールの自動抽出アラート</p>
+                    </article>
+                </div>
+
+                <div class="feature-grid sub">
+                    <article class="sub-feature pop-card">
+                        <div class="sub-head">
+                            <span class="sub-icon bg-blue c-white"><svg class="icon"><use href="#i-timeline"/></svg></span>
+                            <h3>個別選考タイムライン</h3>
+                        </div>
+                        <p>学生ごとの応募履歴、各面接の手応え、指導記録をタイムラインで見える化。教員どうしの引き継ぎもスムーズです。</p>
+                    </article>
+                    <article class="sub-feature pop-card">
+                        <div class="sub-head">
+                            <span class="sub-icon bg-yellow"><svg class="icon"><use href="#i-csv"/></svg></span>
+                            <h3>ワンクリックCSV出力</h3>
+                        </div>
+                        <p>すべてのエントリーデータを、ワンクリックでCSVに出力。行政機関への提出資料や、学内の集計資料づくりに使えます。</p>
+                    </article>
+                    <article class="sub-feature pop-card">
+                        <div class="sub-head">
+                            <span class="sub-icon bg-red c-white"><svg class="icon"><use href="#i-usergear"/></svg></span>
+                            <h3>クラス・ユーザー柔軟管理</h3>
+                        </div>
+                        <p>年度更新のときのクラス編成、担当教員の割り当て変更、教員アカウントの追加や設定変更を、画面上でかんたんに行えます。</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 権限ロール ================= -->
+        <section class="section section-white" id="roles">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-badge bg-blue c-white">ACCESS CONTROL</span>
+                    <h2 class="section-title">校内運用に適した2階層の権限設計</h2>
+                    <p class="section-lead">学校の組織に合わせて、「学校管理者」と「一般教員」の2つの権限を用意。情報の漏えいを防ぎ、スムーズな校内運用を実現します。</p>
+                </div>
+
+                <div class="roles">
+                    <article class="role pop-card bg-cream">
+                        <div>
+                            <span class="role-badge bg-blue c-white">SCHOOL ADMIN</span>
+                            <h3>学校管理者（統括・就職対策室向け）</h3>
+                            <p>全校生の就職進捗の閲覧、教員アカウントの発行・停止、学科・クラスと資格マスタの設定、全体データのCSV一括出力を行えます。</p>
+                        </div>
+                        <ul class="role-list">
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>教員アカウントの発行・アクセス制御</li>
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>学科・クラス・資格マスタの管理</li>
+                            <li><svg class="icon c-blue"><use href="#i-check-circle"/></svg>全校生データのCSV出力・報告作成</li>
+                        </ul>
+                    </article>
+                    <article class="role pop-card bg-cream">
+                        <div>
+                            <span class="role-badge bg-yellow">TEACHER</span>
+                            <h3>一般教員（クラス担任向け）</h3>
+                            <p>担当クラスの学生登録、選考エントリー状況の更新、面接日程の入力、個別のアドバイス・指導メモの記録に特化した操作ができます。</p>
+                        </div>
+                        <ul class="role-list">
+                            <li><svg class="icon c-yellow-dark"><use href="#i-check-circle"/></svg>担当クラスの学生情報の更新</li>
+                            <li><svg class="icon c-yellow-dark"><use href="#i-check-circle"/></svg>選考の段階・次回面接日程の入力</li>
+                            <li><svg class="icon c-yellow-dark"><use href="#i-check-circle"/></svg>学生ごとの指導履歴メモの記録</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 導入の流れ ================= -->
+        <section class="section" id="flow">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-badge bg-yellow">HOW TO START</span>
+                    <h2 class="section-title">導入の流れ</h2>
+                    <p class="section-lead">学校ごとに専用の環境をご用意します。ほかの学校とデータが混ざることはありません。</p>
+                </div>
+
+                <ol class="flow">
+                    <li class="flow-step pop-card">
+                        <span class="flow-no">01</span>
+                        <span class="flow-icon bg-cyan"><svg class="icon"><use href="#i-mail"/></svg></span>
+                        <h3>お問い合わせ</h3>
+                        <p>お問い合わせフォームから、資料請求や導入のご相談をお送りください。</p>
+                    </li>
+                    <li class="flow-step pop-card">
+                        <span class="flow-no">02</span>
+                        <span class="flow-icon bg-yellow"><svg class="icon"><use href="#i-school"/></svg></span>
+                        <h3>ご説明・お申し込み</h3>
+                        <p>学校の運用に合わせて機能をご説明し、お申し込みをいただきます。</p>
+                    </li>
+                    <li class="flow-step pop-card">
+                        <span class="flow-no">03</span>
+                        <span class="flow-icon bg-pink c-white"><svg class="icon"><use href="#i-key"/></svg></span>
+                        <h3>アカウントの発行</h3>
+                        <p>学校専用の環境を用意し、学校コードと学校管理者のアカウントを発行します。</p>
+                    </li>
+                    <li class="flow-step pop-card">
+                        <span class="flow-no">04</span>
+                        <span class="flow-icon bg-blue c-white"><svg class="icon"><use href="#i-rocket"/></svg></span>
+                        <h3>利用開始</h3>
+                        <p>クラスと教員アカウントを登録すれば、すぐに使いはじめられます。</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ================= CTA ================= -->
+        <section class="cta" id="contact">
+            <div class="container cta-inner">
+                <span class="section-badge bg-red">INQUIRY &amp; DOCUMENT REQUEST</span>
+                <h2 class="cta-title">R-eadership で<br>就職進路指導を次のステージへ。</h2>
+                <p class="cta-lead">製品資料のご請求、導入時期のご相談、オンラインでの個別のご説明をご希望の専門学校様は、お問い合わせフォームからお気軽にご連絡ください。</p>
+                <a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact" class="pop-btn btn-red btn-lg">
+                    <span>お問い合わせ・資料請求はこちら</span><svg class="icon"><use href="#i-arrow-right"/></svg>
+                </a>
+                <p class="cta-note">お問い合わせは、R-SERIES 共通のお問い合わせフォームで受け付けています。</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="brand-mark is-small"><img src="img/logo.png" alt="" width="24" height="28"></span>
+                        <span class="brand-name">R-eadership</span>
+                    </div>
+                    <p>専門学校向けの就職進路管理システム。学生一人ひとりの選考状況を、教員みんなで見える化します。</p>
+                    <a href="https://jprojectsriki-cpu.github.io/rikis_collection/" class="footer-series"><span>R-SERIES 一覧へ</span><svg class="icon"><use href="#i-arrow-right"/></svg></a>
+                </div>
+                <div class="footer-col">
+                    <p class="footer-head">MENU</p>
+                    <ul>
+                        <li><a href="#problems">課題と解決</a></li>
+                        <li><a href="#features">主要機能</a></li>
+                        <li><a href="#roles">権限ロール</a></li>
+                        <li><a href="#flow">導入の流れ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <p class="footer-head">INFORMATION</p>
+                    <ul>
+                        <li><a href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact">お問い合わせ・資料請求</a></li>
+                    </ul>
+                </div>
+            </div>
+            <p class="copyright">&copy; 2026 R-eadership / ReicherRick. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
