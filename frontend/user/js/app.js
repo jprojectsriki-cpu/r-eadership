@@ -30,6 +30,23 @@
         $('scrim').hidden = !open;
     }
 
+    /* ---------- 画面の中身 ---------- */
+    // js/pages/○○.js で作った画面があればそれを表示し、なければ「準備中」を表示する
+    function drawPage(key, page) {
+        var body = $('pageBody');
+        body.replaceChildren();
+        var mod = (window.RPages || {})[key];
+        if (mod && typeof mod.render === 'function') {
+            mod.render(body, { user: user, isAdmin: isAdmin() });
+            return;
+        }
+        body.append(RUI.el('section', { class: 'panel soon-panel' }, [
+            RUI.el('span', { class: 'soon-icon' }, [RUI.icon('i-tool')]),
+            RUI.el('p', { class: 'soon-title', text: 'この画面は準備中です' }),
+            RUI.el('p', { class: 'soon-text', text: 'このあとのステップ（' + page.step + '）で作ります。' })
+        ]));
+    }
+
     /* ---------- 画面の切り替え ---------- */
     function route() {
         var key = location.hash.replace('#', '');
@@ -46,7 +63,7 @@
         });
         $('pageTitle').textContent = page.title;
         $('pageDesc').textContent = page.desc;
-        $('soonText').textContent = 'このあとのステップ（' + page.step + '）で作ります。';
+        drawPage(key, page);
         document.title = page.title + ' | R-eadership';
         setMenu(false);
         $('main').focus({ preventScroll: true });

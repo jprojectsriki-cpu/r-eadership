@@ -35,6 +35,16 @@ function doPost(e) {
         return json_(logout_(req.token));
       case 'me':
         return json_(checkSession_(req.token));
+      case 'masters':
+        return json_(listMasters_(req.token));
+      case 'saveClass':
+        return json_(saveClass_(req.token, req.item));
+      case 'deleteClass':
+        return json_(deleteClass_(req.token, req.code));
+      case 'saveQualification':
+        return json_(saveQualification_(req.token, req.item));
+      case 'deleteQualification':
+        return json_(deleteQualification_(req.token, req.id));
       default:
         return json_({ ok: false, message: '不明な操作です。' });
     }

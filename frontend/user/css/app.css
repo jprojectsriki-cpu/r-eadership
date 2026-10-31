@@ -106,6 +106,60 @@ button { font: inherit; color: inherit; }
 .soon-title { font-size: 1.05rem; font-weight: 900; }
 .soon-text { font-size: 0.86rem; color: var(--text-muted); }
 
+/* ---------- 一覧・タブ ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tabs { display: flex; gap: 6px; margin-bottom: 14px; border-bottom: 2px solid var(--line); }
+.tab { margin-bottom: -2px; padding: 8px 16px; border: 2px solid transparent; border-bottom: none; border-radius: 10px 10px 0 0; background: none; font-weight: 800; font-size: 0.92rem; color: var(--text-muted); cursor: pointer; }
+.tab:hover { color: var(--text); }
+.tab.is-active { border-color: var(--dark); border-bottom: 2px solid var(--surface); background: var(--surface); color: var(--dark); box-shadow: inset 0 4px 0 var(--yellow); }
+.panel-flush { padding: 0; overflow: hidden; }
+.list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 2px solid var(--line); }
+.list-count { font-weight: 800; }
+.empty { padding: 36px 18px; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.data-table th { padding: 10px 18px; background: var(--bg); border-bottom: 2px solid var(--line); text-align: left; font-size: 0.78rem; font-weight: 800; color: var(--text-muted); white-space: nowrap; }
+.data-table td { padding: 12px 18px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: #FFFDF3; }
+.cell-main { font-weight: 800; }
+.cell-mono { font-family: var(--font-en); color: var(--text-muted); }
+.col-action { width: 1%; text-align: right; white-space: nowrap; }
+
+/* ---------- ダイアログ ---------- */
+.r-modal { width: min(520px, calc(100% - 24px)); max-height: calc(100vh - 32px); margin: auto; padding: 0; border: 2px solid var(--dark); border-radius: 14px; box-shadow: 5px 5px 0 var(--dark); background: var(--surface); color: var(--text); }
+.r-modal::backdrop { background: rgba(30, 27, 24, 0.45); }
+.r-modal .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 2px solid var(--dark); background: var(--yellow); }
+.r-modal.is-danger .modal-head { background: #FFE3E9; }
+.r-modal h2 { font-size: 1.05rem; font-weight: 900; }
+.modal-x { width: 34px; height: 34px; }
+.modal-body { padding: 18px; max-height: calc(100vh - 180px); overflow-y: auto; }
+.modal-foot { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-top: 2px solid var(--line); background: var(--bg); }
+.modal-foot .spacer { flex: 1; }
+.modal-foot .btn:not(.btn-danger-ghost):first-of-type { margin-left: auto; }
+.confirm-text { line-height: 1.9; }
+.form-field { margin-bottom: 14px; }
+.form-field label { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 0.85rem; font-weight: 800; }
+.form-field em { font-style: normal; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); }
+.form-field em.req { color: var(--red); }
+.form-field input, .form-field textarea, .form-field select { width: 100%; min-height: 42px; padding: 8px 12px; border: 2px solid #CFC7BA; border-radius: 10px; background: var(--surface); font: inherit; font-size: 16px; color: var(--text); }
+.form-field textarea { resize: vertical; line-height: 1.7; }
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(43, 80, 255, 0.18); }
+.field-hint { margin-top: 4px; font-size: 0.78rem; color: var(--text-muted); }
+.form-error { min-height: 1.4em; font-size: 0.86rem; font-weight: 800; color: var(--red); }
+.form-error:empty { min-height: 0; }
+.btn-danger-ghost { border-color: transparent; box-shadow: none; background: transparent; color: var(--red); }
+.btn-danger-ghost:hover { border-color: var(--red); box-shadow: 2px 2px 0 var(--red); background: #FFF0F3; }
+.btn:disabled { opacity: 0.55; cursor: wait; transform: none; }
+
+/* ---------- 右下のお知らせ ---------- */
+.toast-box { position: fixed; right: 16px; bottom: 16px; z-index: 100; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.toast { max-width: min(380px, calc(100vw - 32px)); padding: 10px 16px; border: 2px solid var(--dark); border-radius: 10px; box-shadow: 3px 3px 0 var(--dark); background: var(--dark); color: #fff; font-size: 0.88rem; font-weight: 800; animation: toast-in 0.2s ease both; }
+.toast.is-error { background: var(--red); }
+.toast.is-leaving { animation: toast-out 0.25s ease both; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(8px); } }
+
 /* ---------- スマホ・タブレット ---------- */
 @media (max-width: 900px) {
     .app { grid-template-columns: minmax(0, 1fr); }
@@ -127,6 +181,23 @@ button { font: inherit; color: inherit; }
     .nav-logout { display: flex; margin-top: 22px; border-top: 2px dashed var(--line); border-radius: 0; padding-top: 16px; }
     .main { padding: 22px 16px 40px; }
     .page-title { font-size: 1.25rem; }
+}
+@media (max-width: 640px) {
+    /* 表を、1件ずつのカードの形にする */
+    .data-table thead { display: none; }
+    .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
+    .data-table tr { position: relative; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table td { display: flex; gap: 10px; padding: 2px 0; border: none; font-size: 0.86rem; }
+    .data-table td::before { content: attr(data-label); flex: 0 0 6.5em; font-size: 0.76rem; font-weight: 800; color: var(--text-muted); }
+    .data-table td.cell-main { padding-right: 84px; font-size: 0.98rem; }
+    .data-table td.cell-main::before { display: none; }
+    .data-table td.col-action { position: absolute; top: 10px; right: 12px; width: auto; padding: 0; }
+    .data-table td.col-action::before { display: none; }
+    .list-head { padding: 12px 14px; }
+    .list-head .btn { padding: 6px 12px; }
+    .modal-foot { flex-wrap: wrap; }
+    .tab { padding: 8px 12px; }
 }
 @media (max-width: 480px) {
     .logout-btn span { display: none; }
