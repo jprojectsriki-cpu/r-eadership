@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R-eadership</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600;700&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/loading.css">
+</head>
+<body>
+    <svg width="0" height="0" class="sprite" aria-hidden="true">
+        <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol>
+        <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.9-3.6 3.4-5.5 6.5-5.5s5.6 1.9 6.5 5.5"/><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c1.8.8 3 2.6 3.5 5.2"/></symbol>
+        <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 12.5h18M11 12.5v2h2v-2"/></symbol>
+        <symbol id="i-usergear" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5 1.2 0 2.3.3 3.2.8"/><circle cx="17.5" cy="16.5" r="2.2"/><path d="M17.5 12.5v1.8M17.5 18.7v1.8M13.5 16.5h1.8M19.7 16.5h1.8"/></symbol>
+        <symbol id="i-school" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5M22 9v6"/></symbol>
+        <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+        <symbol id="i-logout" viewBox="0 0 24 24"><path d="M14 17l5-5-5-5M19 12H8"/><path d="M11 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/></symbol>
+        <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+        <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3z"/><path d="M14.5 6.5L17 4l3 3-2.5 2.5"/></symbol>
+    </svg>
+
+    <div class="app" id="app" hidden>
+        <!-- 上のバー -->
+        <header class="topbar">
+            <button type="button" class="icon-btn menu-btn" id="menuBtn" aria-controls="sidebar" aria-expanded="false" aria-label="メニューを開く">
+                <svg class="icon"><use href="#i-menu"/></svg>
+            </button>
+            <a href="#dashboard" class="brand" aria-label="ダッシュボードへ">
+                <span class="brand-mark"><img src="img/logo.png" alt="" width="22" height="25"></span>
+                <span class="brand-name">R-eadership</span>
+            </a>
+            <span class="school-name" id="schoolName"></span>
+            <div class="user-box">
+                <span class="user-text">
+                    <span class="user-name" id="userName"></span>
+                    <span class="role-tag" id="userRole"></span>
+                </span>
+                <button type="button" class="btn btn-ghost btn-sm logout-btn" id="logoutBtn">
+                    <svg class="icon"><use href="#i-logout"/></svg><span>ログアウト</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 左のメニュー（スマホでは横から開く） -->
+        <nav class="sidebar" id="sidebar" aria-label="メニュー">
+            <div class="side-user">
+                <p class="side-school" id="sideSchool"></p>
+                <p class="side-name"><span id="sideName"></span><span class="role-tag" id="sideRole"></span></p>
+            </div>
+            <p class="nav-label">メニュー</p>
+            <a href="#dashboard" class="nav-item" data-page="dashboard"><svg class="icon"><use href="#i-home"/></svg><span>ダッシュボード</span></a>
+            <a href="#students" class="nav-item" data-page="students"><svg class="icon"><use href="#i-users"/></svg><span>学生名簿</span></a>
+            <a href="#entries" class="nav-item" data-page="entries"><svg class="icon"><use href="#i-briefcase"/></svg><span>応募管理</span></a>
+            <a href="#notices" class="nav-item" data-page="notices"><svg class="icon"><use href="#i-bell"/></svg><span>お知らせ</span></a>
+            <div class="nav-admin" data-admin-only>
+                <p class="nav-label">学校管理者メニュー</p>
+                <a href="#teachers" class="nav-item" data-page="teachers"><svg class="icon"><use href="#i-usergear"/></svg><span>教員アカウント</span></a>
+                <a href="#classes" class="nav-item" data-page="classes"><svg class="icon"><use href="#i-school"/></svg><span>クラス・資格</span></a>
+            </div>
+            <button type="button" class="nav-item nav-logout" id="logoutBtn2"><svg class="icon"><use href="#i-logout"/></svg><span>ログアウト</span></button>
+        </nav>
+        <div class="scrim" id="scrim" hidden></div>
+
+        <!-- 中身 -->
+        <main class="main" id="main" tabindex="-1">
+            <div class="page-head">
+                <h1 class="page-title" id="pageTitle"></h1>
+                <p class="page-desc" id="pageDesc"></p>
+            </div>
+            <section class="panel soon-panel">
+                <span class="soon-icon"><svg class="icon"><use href="#i-tool"/></svg></span>
+                <p class="soon-title">この画面は準備中です</p>
+                <p class="soon-text" id="soonText"></p>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/schools.js"></script>
+    <script src="js/loading.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

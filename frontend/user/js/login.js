@@ -1,8 +1,8 @@
 /* R-eadership ログインページ
  * - 学校コードから、その学校のGAS（API）のURLを探す（js/schools.js）
  * - ログイン（成功したら、トークンと学校コードをこのブラウザに保存）
- * - すでにログイン中なら、その状態を表示
- * - 「?reason=replaced」「?reason=expired」付きで開かれたら、理由を表示
+ * - ログインできたら、アプリ画面（app.html）へ移る。すでにログイン中なら、そのまま移る
+ * - 「?reason=○○」付きで開かれたら、理由を表示（アプリ画面から戻ってきたとき）
  */
 (function () {
     'use strict';
@@ -44,18 +44,8 @@
     }
 
     /* ---------- 表示の切り替え ---------- */
-    function showLogin() {
-        $('doneCard').hidden = true;
-        $('loginCard').hidden = false;
-    }
-    function showDone(user) {
-        $('doneSchool').textContent = user.schoolName + '（' + user.schoolCode + '）';
-        $('doneName').textContent = user.name + '（' + user.teacherId + '）';
-        $('doneRole').textContent = user.role === 'admin' ? '学校管理者' : '教員';
-        $('loginCard').hidden = true;
-        $('doneCard').hidden = false;
-        // ※ ダッシュボード（L-5〜）ができたら、ここで移動する
-    }
+    function showLogin() { $('loginCard').hidden = false; }
+    function goApp() { Loader.show('画面を開いています'); location.replace('app.html'); }
 
     /* ---------- ログイン ---------- */
     function initForm() {
@@ -96,8 +86,8 @@
                         store(TOKEN_KEY, res.token);
                         store(SCHOOL_KEY, code);
                         f.password.value = '';
-                        f.password.type = 'password';
-                        showDone(res.user);
+                        goApp();
+                        return;
                     } else {
                         setMsg((res && res.message) || 'ログインに失敗しました。', true);
                     }
@@ -108,24 +98,20 @@
                 })
                 .then(function () { btn.disabled = false; });
         });
-
-        $('logoutBtn').addEventListener('click', function () {
-            var token = load(TOKEN_KEY);
-            var url = apiUrl(load(SCHOOL_KEY));
-            store(TOKEN_KEY, '');
-            var done = function () { showLogin(); setMsg('ログアウトしました。'); };
-            if (!token || !url) { done(); return; }
-            Loader.wrap('ログアウトしています', apiPost(url, { action: 'logout', token: token }))
-                .catch(function () { /* 画面ではログアウト済みにする */ })
-                .then(done);
-        });
     }
 
     /* ---------- 開いたとき ---------- */
     function start() {
         var reason = new URLSearchParams(location.search).get('reason');
-        if (reason === 'replaced') alertBox('別の端末でログインされたため、ログアウトしました。');
-        if (reason === 'expired') alertBox('ログインの有効期限が切れました。もう一度ログインしてください。');
+        var REASONS = {
+            replaced: '別の端末でログインされたため、ログアウトしました。',
+            expired: 'ログインの有効期限が切れました。もう一度ログインしてください。',
+            stopped: 'このアカウントは現在ご利用いただけません。学校管理者にお問い合わせください。',
+            error: '通信に失敗しました。時間をおいてもう一度ログインしてください。'
+        };
+        if (REASONS[reason]) alertBox(REASONS[reason]);
+        if (reason === 'logout') setMsg('ログアウトしました。');
+        if (reason) history.replaceState(null, '', location.pathname); // 再読み込みで同じ表示が出ないように
 
         var token = load(TOKEN_KEY);
         var url = apiUrl(load(SCHOOL_KEY));
@@ -134,7 +120,7 @@
         // すでにログインしているかを確認する
         Loader.wrap('ログイン状態を確認しています', apiPost(url, { action: 'me', token: token }))
             .then(function (res) {
-                if (res && res.ok) { showDone(res.user); return; }
+                if (res && res.ok) { goApp(); return; }
                 store(TOKEN_KEY, '');
                 showLogin();
                 if (res && res.message && res.reason !== 'expired') alertBox(res.message);
