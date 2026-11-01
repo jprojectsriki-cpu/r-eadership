@@ -313,6 +313,7 @@
     function draw() {
         root.replaceChildren();
         var actions = admin ? el('div', { class: 'head-actions' }, [
+            el('button', { type: 'button', class: 'btn', onclick: exportCsv }, [RUI.icon('i-download'), el('span', { text: 'CSVで書き出し' })]),
             el('button', { type: 'button', class: 'btn', onclick: openImport }, [RUI.icon('i-upload'), el('span', { text: 'CSVで登録' })]),
             el('button', { type: 'button', class: 'btn btn-primary', onclick: function () { openBasicForm(null); } }, [RUI.icon('i-plus'), el('span', { text: '学生を登録' })])
         ]) : null;
@@ -583,6 +584,27 @@
         });
     }
 
+    /* ---------- CSVで書き出し（学校管理者だけ）。いましぼりこんでいる学生を、すべてのページの分まとめて ---------- */
+    function exportCsv() {
+        var list = filtered();
+        if (view === 'quals' && qualFilter) list = list.filter(function (s) { return qualFilter === '__none' ? !s.quals.length : s.quals.indexOf(qualFilter) >= 0; });
+        if (!list.length) { RUI.toast('書き出す学生がいません。しぼりこみを変えてください。', 'error'); return; }
+        RUI.confirm({
+            title: 'CSVで書き出し', okLabel: list.length + '人分を書き出す',
+            message: 'いまの条件に合う ' + list.length + '人分の学生名簿を、CSVファイルで保存します。個人情報がふくまれるので、学校のルールに従って保管し、使い終わったら削除してください。'
+        }).then(function (yes) {
+            if (!yes) return;
+            var headers = ['学籍番号', '名前', 'ふりがな', '生年月日', '性別', '国籍', '電話番号', 'メールアドレス', '学科', '学年', 'クラス', '卒業予定年度', '在籍状態', '希望進路', '進学予定先', '就活の状況', '取得資格', 'メモ'];
+            var rows = list.map(function (s) {
+                var c = cls(s.classCode), d = c && dept(c.deptId);
+                return [s.studentNo, s.name, s.kana, s.birth, s.gender, s.nation, s.tel, s.mail, d ? d.name : '', c ? c.grade : '', c ? c.name : s.classCode,
+                    s.gradYear, s.enroll, s.course, s.school, s.job, s.quals.map(function (q) { return short(qual(q), q); }).join('・'), s.memo];
+            });
+            RUI.downloadCsv('readership_students_' + RUI.todayStamp() + '.csv', headers, rows);
+            RUI.toast(list.length + '人分を書き出しました。');
+        });
+    }
+
     /* =========================================================
      * CSVでまとめて登録（学校管理者だけ）
      * ========================================================= */
@@ -591,7 +613,7 @@
         var sample = data.classes[0];
         var lines = [CSV_HEADERS.join(','), ['2026001', '比嘉 太郎', 'ひが たろう', '2006-04-01', '男性', '日本', '090-1234-5678', 'taro@example.com', '就職希望', '', sample ? short(sample) : 'クラスのラベル', ''].map(csvEscape).join(',')];
         var blob = new Blob(['﻿' + lines.join('\r\n') + '\r\n'], { type: 'text/csv' });
-        var a = el('a', { href: URL.createObjectURL(blob), download: '学生名簿_ひな形.csv' });
+        var a = el('a', { href: URL.createObjectURL(blob), download: 'readership_students_template.csv' });
         document.body.append(a); a.click(); a.remove();
         setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     }

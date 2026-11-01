@@ -12,7 +12,7 @@
         dashboard: { title: 'ダッシュボード', desc: '就職決定率・内定率、就活の状況、会社・進学先ごとの人数、3日以内の予定を表示します。', step: 'L-10' },
         students:  { title: '学生名簿', desc: '学生の一覧と、就職活動の状況を確認します。', step: 'L-8' },
         entries:   { title: '応募管理', desc: '学生ごとの応募（エントリー）と、選考の進み具合・次の予定を記録します。', step: 'L-9' },
-        notices:   { title: 'お知らせ', desc: '全体・学校管理者・個人の先生に向けて連絡します。要望・意見は「学校管理者」あてに送ります。', step: 'L-11' },
+        notices:   { title: 'お知らせ', desc: '全体・学校管理者・個人の先生に向けて連絡します。要望・意見は公開範囲を「学校管理者」にして送ります。', step: 'L-11' },
         teachers:  { title: '教員アカウント', desc: '教員アカウントの発行・停止、担当クラス、パスワードの再設定を行います。', step: 'L-7', admin: true },
         classes:   { title: '学科・クラス・資格', desc: '学科（修業年限）・クラス・資格を登録します。学生名簿のプルダウンで使います。', step: 'L-6', admin: true }
     };
@@ -67,10 +67,25 @@
         $('pageTitle').textContent = page.title;
         $('pageDesc').textContent = page.desc;
         drawPage(key, page, params);
+        if (key !== 'notices') refreshUnread();
         document.title = page.title + ' | R-eadership';
         setMenu(false);
         $('main').focus({ preventScroll: true });
         window.scrollTo(0, 0);
+    }
+
+    /* ---------- お知らせの未読の数（メニューに数字を出す） ---------- */
+    function setUnread(n) {
+        var a = document.querySelector('.nav-item[data-page="notices"]');
+        if (!a) return;
+        var badge = a.querySelector('.nav-badge');
+        if (!n) { if (badge) badge.remove(); return; }
+        if (!badge) { badge = RUI.el('span', { class: 'nav-badge' }); a.append(badge); }
+        badge.textContent = n > 99 ? '99+' : String(n);
+        badge.setAttribute('aria-label', '未読 ' + n + '件');
+    }
+    function refreshUnread() {
+        RApi.post('unreadNotices', {}).then(function (res) { if (res && res.ok) setUnread(res.unread); }).catch(function () {});
     }
 
     /* ---------- 自分のパスワードの変更 ---------- */
@@ -127,7 +142,7 @@
             .then(function (res) {
                 if (!res || !res.ok) { RLoading.hide(); RApi.toLogin('expired'); return; }
                 user = res.user;
-                window.RApp = { user: user }; // 画面（js/pages）から、ログインしている人の情報を見るため
+                window.RApp = { user: user, setUnread: setUnread }; // 画面（js/pages）から、ログインしている人の情報を見るため
                 showUser();
                 $('app').hidden = false;
                 route();

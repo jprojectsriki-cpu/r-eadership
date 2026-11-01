@@ -4,10 +4,11 @@
  *   RUI.confirm({ title, message, okLabel, danger }) → Promise<true/false>  … 確認の画面
  *   RUI.form({ title, fields, submitLabel, onSubmit, deleteLabel, onDelete }) … 入力の画面
  *      fields: [{ name, label, value, required, placeholder, maxlength, hint, autocomplete,
- *                 type（text／password／textarea／select／checks〈チェックの一覧・値は配列〉／static〈表示だけ〉）, options（select・checks のとき） }]
+ *                 type（text／password／textarea／select／checks〈チェックの一覧・値は配列〉／static〈表示だけ〉／custom〈render・getValue〉）, options（select・checks のとき） }]
  *   RUI.notice(title, [要素], okLabel) → Promise  … OKだけのお知らせの画面
  *   RUI.copyText(text) → Promise<true/false>      … 文字をコピーする
  *   RUI.modal(title, body要素, footer要素, danger) → dialog … 自由な中身のダイアログ
+ *   RUI.downloadCsv('名前.csv', [見出し], [[値, …], …])  … CSVを作って保存する（Excel用にBOM付き）
  *      onChange(form, name) … 入力が変わったときに呼ばれる（ほかの欄の選択肢を変えるときに使う）
  *      onSubmit(values) / onDelete() は Promise を返す。結果が { ok: false, message } なら画面にエラーを出して閉じない
  */
@@ -55,6 +56,20 @@ window.RUI = (function () {
             return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
         }
         return Promise.resolve(false);
+    }
+
+    /* ---------- CSVのファイルを作って保存する（Excelで文字化けしないよう、先頭にBOMを付ける） ---------- */
+    function downloadCsv(filename, headers, rows) {
+        var esc = function (v) { v = String(v == null ? '' : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+        var text = [headers].concat(rows).map(function (r) { return r.map(esc).join(','); }).join('\r\n') + '\r\n';
+        var blob = new Blob(['\ufeff' + text], { type: 'text/csv' });
+        var a = el('a', { href: URL.createObjectURL(blob), download: filename });
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    }
+    function todayStamp() {
+        var d = new Date();
+        return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
     }
 
     /* ---------- プルダウンの選択肢を入れかえる ---------- */
@@ -115,7 +130,11 @@ window.RUI = (function () {
         (opt.fields || []).forEach(function (fd, i) {
             var id = 'ff-' + Date.now() + '-' + i;
             var input;
-            if (fd.type === 'static') {
+            if (fd.type === 'custom') {
+                // 自由な部品：fd.render() が要素を返し、fd.getValue() で値を読む
+                input = fd.render();
+                input.id = id;
+            } else if (fd.type === 'static') {
                 input = el('p', { class: 'static-value', id: id, text: fd.value || '' });
             } else if (fd.type === 'checks') {
                 // チェックボックスの一覧（group が同じものをまとめて表示する）。値は配列
@@ -140,7 +159,7 @@ window.RUI = (function () {
                 input.value = fd.value == null ? '' : fd.value;
             }
             f.append(el('div', { class: 'form-field' }, [
-                el(fd.type === 'checks' ? 'p' : 'label', { for: fd.type === 'checks' ? null : id, class: 'field-label' }, [document.createTextNode(fd.label), fd.type === 'static' ? null : (fd.required ? el('em', { class: 'req', text: '必須' }) : el('em', { text: '任意' }))]),
+                el(fd.type === 'checks' || fd.type === 'custom' ? 'p' : 'label', { for: fd.type === 'checks' || fd.type === 'custom' ? null : id, class: 'field-label' }, [document.createTextNode(fd.label), fd.type === 'static' ? null : (fd.required ? el('em', { class: 'req', text: '必須' }) : el('em', { text: '任意' }))]),
                 input,
                 fd.hint ? el('p', { class: 'field-hint', text: fd.hint }) : null
             ]));
@@ -183,11 +202,16 @@ window.RUI = (function () {
                     return;
                 }
                 if (fd.type === 'static') return;
+                if (fd.type === 'custom') {
+                    values[fd.name] = fd.getValue();
+                    if (fd.required && !values[fd.name] && !missing) missing = fd;
+                    return;
+                }
                 var v = f.elements[fd.name].value;
                 values[fd.name] = fd.type === 'password' ? v : v.trim();
                 if (fd.required && !values[fd.name] && !missing) missing = fd;
             });
-            if (missing) { msg.textContent = missing.label + (missing.type === 'select' ? 'を選んでください。' : 'を入力してください。'); f.elements[missing.name].focus(); return; }
+            if (missing) { msg.textContent = missing.label + (missing.type === 'select' || missing.type === 'custom' ? 'を選んでください。' : 'を入力してください。'); if (f.elements[missing.name]) f.elements[missing.name].focus(); return; }
             run(opt.onSubmit(values));
         });
         if (del) del.addEventListener('click', function () { run(opt.onDelete()); });
@@ -201,5 +225,5 @@ window.RUI = (function () {
         return dlg;
     }
 
-    return { el: el, icon: icon, toast: toast, confirm: confirm, form: form, notice: notice, copyText: copyText, setOptions: setOptions, modal: modal };
+    return { el: el, icon: icon, toast: toast, confirm: confirm, form: form, notice: notice, copyText: copyText, setOptions: setOptions, modal: modal, downloadCsv: downloadCsv, todayStamp: todayStamp };
 })();

@@ -97,6 +97,22 @@ function doPost(e) {
         return json_(saveRecord_(req.token, req.item));
       case 'deleteRecord':
         return json_(deleteRecord_(req.token, req.recordId));
+      case 'notices':
+        return json_(listNotices_(req.token));
+      case 'unreadNotices':
+        return json_(unreadNotices_(req.token));
+      case 'teacherDirectory':
+        return json_(teacherDirectory_(req.token));
+      case 'noticeDetail':
+        return json_(noticeDetail_(req.token, req.noticeId));
+      case 'saveNotice':
+        return json_(saveNotice_(req.token, req.item));
+      case 'deleteNotice':
+        return json_(deleteNotice_(req.token, req.noticeId));
+      case 'replyNotice':
+        return json_(replyNotice_(req.token, req.noticeId, req.body));
+      case 'deleteReply':
+        return json_(deleteReply_(req.token, req.replyId));
       default:
         return json_({ ok: false, message: '不明な操作です。' });
     }

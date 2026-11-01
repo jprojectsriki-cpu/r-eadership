@@ -83,10 +83,22 @@ const SHEETS = {
   },
   notices: {
     name: 'お知らせ',
-    headers: ['お知らせID', 'タイトル', '本文', '重要', '表示開始日', '表示終了日', '作成した教員', '作成日時'],
-    widths: [110, 220, 360, 70, 100, 100, 110, 140],
-    textCols: 7,
-    lists: { 4: ['通常', '重要'] }
+    headers: ['お知らせID', 'タイトル', '本文', '重要', '公開範囲', '宛先の教員ID', '投稿した教員', '作成日時', '更新日時', '最後に書きこんだ教員'],
+    widths: [90, 220, 360, 70, 100, 200, 110, 140, 140, 120],
+    textCols: 10,
+    lists: { 4: ['通常', '重要'], 5: ['全体', '学校管理者', '個人'] }
+  },
+  noticeReplies: {
+    name: 'お知らせの返信',
+    headers: ['返信ID', 'お知らせID', '本文', '投稿した教員', '作成日時'],
+    widths: [90, 90, 360, 110, 140],
+    textCols: 5
+  },
+  noticeReads: {
+    name: 'お知らせの既読',
+    headers: ['お知らせID', '教員ID', '既読日時'],
+    widths: [90, 110, 140],
+    textCols: 3
   }
 };
 
@@ -214,6 +226,26 @@ function upgradeStudents() {
  */
 function upgradeEntries() {
   addMissingColumns_(SHEETS.entries);
+  setupSheets();
+  testSheets();
+}
+
+/**
+ * 【シートの形を新しくするときに実行】お知らせのシートを新しい形にし、「お知らせの返信」「お知らせの既読」シートを作る（L-11）
+ * お知らせシートにデータがあるときは、消さないように止める
+ */
+function upgradeNotices() {
+  const sheet = getSheet_(SHEETS.notices.name);
+  const head = String(sheet.getRange(1, 5).getValue()).trim();
+  if (head !== '公開範囲' && sheet.getLastRow() >= 2) {
+    throw new Error('お知らせシートにデータが入っているため、形を変えられません。中身を確認して、2行目以降を消してから実行してください。');
+  }
+  if (head !== '公開範囲') {
+    sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), SHEETS.notices.headers.length)).clearContent();
+    Logger.log('お知らせ：見出しを新しい形にしました');
+  } else {
+    Logger.log('お知らせ：すでに新しい形です');
+  }
   setupSheets();
   testSheets();
 }

@@ -376,6 +376,25 @@
         listBox.append(el('div', { class: 'table-wrap' }, [el('table', { class: 'data-table entry-table compact' }, [el('thead', {}, [thead]), tbody])]), pager(all.length));
     }
 
+    /* CSVで書き出し（学校管理者だけ）。いましぼりこんでいる応募を、すべてのページの分まとめて */
+    function exportCsv() {
+        var list = filtered();
+        if (!list.length) { RUI.toast('書き出す応募がありません。しぼりこみを変えてください。', 'error'); return; }
+        RUI.confirm({
+            title: 'CSVで書き出し', okLabel: list.length + '件を書き出す',
+            message: 'いまの条件に合う ' + list.length + '件の応募を、CSVファイルで保存します。個人情報がふくまれるので、学校のルールに従って保管し、使い終わったら削除してください。'
+        }).then(function (yes) {
+            if (!yes) return;
+            var headers = ['学籍番号', '名前', '学年', 'クラス', '会社名', '職種', '勤務地', '給与', '応募日', '選考の段階', '結果', '次の予定日', '時刻', '次の予定の内容', 'メモ', '更新日時', '更新した教員'];
+            var rows = list.map(function (e) {
+                var s = student(e.studentId) || {}, c = cls(s.classCode);
+                return [s.studentNo, s.name, c ? c.grade : '', c ? c.name : '', e.company, e.job, e.place, e.salary, e.applied, e.stage, e.result, e.nextDate, e.nextTime, e.nextNote, e.memo, e.updatedAt, e.updatedBy];
+            });
+            RUI.downloadCsv('readership_entries_' + RUI.todayStamp() + '.csv', headers, rows);
+            RUI.toast(list.length + '件を書き出しました。');
+        });
+    }
+
     function draw() {
         root.replaceChildren();
         statBox = el('div', { class: 'stat-row', role: 'group', 'aria-label': '結果ごとの件数（押すとしぼりこみます）' });
@@ -383,11 +402,14 @@
         root.append(statBox, el('section', { class: 'panel panel-flush' }, [
             el('div', { class: 'list-head' }, [
                 el('p', { class: 'list-count', text: '応募の一覧（次の予定が近い順）' }),
+                el('div', { class: 'head-actions' }, [
+                (window.RApp && RApp.user && RApp.user.role === 'admin') ? el('button', { type: 'button', class: 'btn', onclick: exportCsv }, [RUI.icon('i-download'), el('span', { text: 'CSVで書き出し' })]) : null,
                 el('button', { type: 'button', class: 'btn btn-primary', onclick: function () {
                     if (!data.students.length) { RUI.toast('先に学生名簿で学生を登録してください。', 'error'); return; }
                     var fixed = filters.student ? student(filters.student) : null;
                     openEntryForm(null, fixed, function (res) { replaceEntry(res.item); setJob(res.item.studentId, res.jobStatus); draw(); });
                 } }, [RUI.icon('i-plus'), el('span', { text: '応募を登録' })])
+                ])
             ]),
             toolbar(),
             listBox

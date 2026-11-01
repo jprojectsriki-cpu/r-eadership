@@ -2,7 +2,7 @@
  * - 学校管理者はすべて、教員は担当クラスの学生だけで集計する（GASが選んで返したデータを使う）
  * - しぼりこみ：卒業予定年度・学科（最初は、今年度に卒業する学年）
  * - 数える学生：在籍・卒業の学生（休学・退学・除籍は、人数だけ別に表示）
- * - 表示：学生数／就職希望／就職決定率・内定率のメーター／就活の状況と希望進路の割合／
+ * - 表示：お知らせ（未読・重要を先に3件）／学生数／就職希望／就職決定率・内定率のメーター／就活の状況と希望進路の割合／
  *         会社ごとの人数（エントリーと就職決定）／進学先ごとの人数／クラスごとの就職決定率／3日以内の予定
  * - 数字は0から増え、メーターと棒は左から伸びる（動きを減らす設定の人には動かさない）
  */
@@ -18,7 +18,7 @@
     var TOP = 10;
     var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var data = { students: [], entries: [], classes: [], departments: [], fiscalYear: 0, today: '' };
+    var data = { students: [], entries: [], classes: [], departments: [], notices: [], fiscalYear: 0, today: '' };
     var filters = { year: '', dept: '' };
     var showAll = { company: false, school: false };
     var root = null;
@@ -206,6 +206,23 @@
             gauge('内定率', offered, jobWish.length, '#E8336B', '内定＋就職先決定')
         ]));
 
+        // お知らせ（未読と重要を先に、3件まで）
+        var ns = data.notices.slice().sort(function (a, b) {
+            return (b.unread - a.unread) || (b.important - a.important) || b.updatedAt.localeCompare(a.updatedAt);
+        }).slice(0, 3);
+        var unreadN = data.notices.filter(function (n) { return n.unread; }).length;
+        root.append(card('お知らせ', unreadN ? '未読 ' + unreadN + '件' : '未読はありません', el('div', {}, [
+            ns.length ? el('ul', { class: 'dash-notices' }, ns.map(function (n) {
+                return el('li', { class: n.unread ? 'is-unread' : '' }, [
+                    el('span', { class: 'unread-dot', 'aria-hidden': 'true' }),
+                    n.important ? el('span', { class: 'st-tag notice-important', text: '重要' }) : null,
+                    el('a', { href: '#notices', class: 'dash-notice-title', text: n.title }),
+                    el('span', { class: 'muted', text: n.byName + '　' + String(n.updatedAt).slice(5, 16).replace('-', '/') })
+                ]);
+            })) : el('p', { class: 'muted dash-empty', text: 'お知らせはありません。' }),
+            el('a', { href: '#notices', class: 'h-link more-btn', text: 'お知らせを開く' })
+        ]), 'dash-notice-card'));
+
         // 就活の状況・希望進路
         var jobParts = JOBS.map(function (j) { return { name: j, value: counted.filter(function (s) { return s.job === j; }).length, color: JOB_COLORS[j], light: j === '未着手' || j === '就職先決定' }; });
         var courseParts = COURSES.map(function (c) { return { name: c, value: counted.filter(function (s) { return s.course === c; }).length, color: COURSE_COLORS[c], light: c === '未定' }; });
@@ -312,9 +329,9 @@
         root = el('div', { class: 'page-dashboard' });
         body.append(root);
         if (!tip) { tip = el('div', { class: 'chart-tip', role: 'tooltip', hidden: true }); document.body.append(tip); }
-        RApi.all([['students'], ['entries'], ['masters']], 'ダッシュボードを読み込んでいます').then(function (res) {
+        RApi.all([['students'], ['entries'], ['masters'], ['notices']], 'ダッシュボードを読み込んでいます').then(function (res) {
             // どのデータが読み込めなかったかを、画面に出す（原因を調べやすくするため）
-            var names = ['学生名簿（students）', '応募（entries）', '学科・クラス・資格（masters）'];
+            var names = ['学生名簿（students）', '応募（entries）', '学科・クラス・資格（masters）', 'お知らせ（notices）'];
             var bad = res.map(function (r, i) { return r && r.ok ? null : names[i] + '：' + ((r && r.message) || '返事がありません'); }).filter(Boolean);
             if (bad.length) {
                 RUI.toast('読み込めませんでした。', 'error');
@@ -329,6 +346,7 @@
             data.entries = res[1].entries;
             data.today = res[1].today;
             data.departments = res[2].departments || [];
+            data.notices = res[3].notices || [];
             data.classes = (res[2].classes || []).slice().sort(function (a, b) { return a.grade - b.grade || a.name.localeCompare(b.name, 'ja', { numeric: true }); });
             // 最初は、今年度に卒業する学年（いなければ、すべて）
             var fy = String(data.fiscalYear);
