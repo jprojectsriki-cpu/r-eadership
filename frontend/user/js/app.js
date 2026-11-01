@@ -11,7 +11,7 @@
     var PAGES = {
         dashboard: { title: 'ダッシュボード', desc: '3日以内の予定、内定率などの集計、お知らせを表示します。', step: 'L-10' },
         students:  { title: '学生名簿', desc: '学生の一覧と、就職活動の状況を確認します。', step: 'L-8' },
-        entries:   { title: '応募管理', desc: '学生ごとの応募（エントリー）と、選考の流れを記録します。', step: 'L-9' },
+        entries:   { title: '応募管理', desc: '学生ごとの応募（エントリー）と、選考の進み具合・次の予定を記録します。', step: 'L-9' },
         notices:   { title: 'お知らせ', desc: '全体・学校管理者・個人の先生に向けて連絡します。要望・意見は「学校管理者」あてに送ります。', step: 'L-11' },
         teachers:  { title: '教員アカウント', desc: '教員アカウントの発行・停止、担当クラス、パスワードの再設定を行います。', step: 'L-7', admin: true },
         classes:   { title: '学科・クラス・資格', desc: '学科（修業年限）・クラス・資格を登録します。学生名簿のプルダウンで使います。', step: 'L-6', admin: true }
@@ -32,12 +32,12 @@
 
     /* ---------- 画面の中身 ---------- */
     // js/pages/○○.js で作った画面があればそれを表示し、なければ「準備中」を表示する
-    function drawPage(key, page) {
+    function drawPage(key, page, params) {
         var body = $('pageBody');
         body.replaceChildren();
         var mod = (window.RPages || {})[key];
         if (mod && typeof mod.render === 'function') {
-            mod.render(body, { user: user, isAdmin: isAdmin() });
+            mod.render(body, { user: user, isAdmin: isAdmin(), params: params });
             return;
         }
         body.append(RUI.el('section', { class: 'panel soon-panel' }, [
@@ -49,7 +49,10 @@
 
     /* ---------- 画面の切り替え ---------- */
     function route() {
-        var key = location.hash.replace('#', '');
+        // 「#entries?student=S001」のように、? のあとに条件を付けられる
+        var parts = location.hash.replace('#', '').split('?');
+        var key = parts[0];
+        var params = new URLSearchParams(parts[1] || '');
         var page = PAGES[key];
         if (!page || (page.admin && !isAdmin())) {
             key = 'dashboard';
@@ -63,7 +66,7 @@
         });
         $('pageTitle').textContent = page.title;
         $('pageDesc').textContent = page.desc;
-        drawPage(key, page);
+        drawPage(key, page, params);
         document.title = page.title + ' | R-eadership';
         setMenu(false);
         $('main').focus({ preventScroll: true });

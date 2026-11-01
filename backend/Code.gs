@@ -81,6 +81,22 @@ function doPost(e) {
         return json_(setEnrollStatuses_(req.token, req.studentIds, req.status, req.reason));
       case 'updateStudentNotes':
         return json_(updateStudentNotes_(req.token, req.studentId, req.quals, req.memo, req.course));
+      case 'entries':
+        return json_(listEntries_(req.token));
+      case 'entryDetail':
+        return json_(entryDetail_(req.token, req.entryId));
+      case 'saveEntry':
+        return json_(saveEntry_(req.token, req.item));
+      case 'updateEntryProgress':
+        return json_(updateEntryProgress_(req.token, req.entryId, req.progress));
+      case 'deleteEntry':
+        return json_(deleteEntry_(req.token, req.entryId));
+      case 'records':
+        return json_(listRecords_(req.token, req.studentId));
+      case 'saveRecord':
+        return json_(saveRecord_(req.token, req.item));
+      case 'deleteRecord':
+        return json_(deleteRecord_(req.token, req.recordId));
       default:
         return json_({ ok: false, message: '不明な操作です。' });
     }

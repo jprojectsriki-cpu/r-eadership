@@ -504,7 +504,7 @@ function updateStudentNotes_(token, studentId, quals, memo, course) {
 /**
  * 卒業から3年たった学生のデータを削除する（在籍状態が「卒業」の学生だけ）
  * 卒業予定年度が 2026 の学生は、2027年3月に卒業 → 2030年4月（2030年度）から削除の対象
- * いっしょに、その学生の変更履歴・応募・指導記録も削除する
+ * いっしょに、その学生の変更履歴・応募・選考の履歴・指導記録も削除する
  * 戻り値：削除した人数
  */
 function purgeOldGraduates_() {
@@ -524,7 +524,7 @@ function purgeOldGraduates_() {
     if (rows.length) sheet.getRange(2, 1, rows.length, SHEETS.students.headers.length).clearContent();
     if (keep.length) sheet.getRange(2, 1, keep.length, SHEETS.students.headers.length).setValues(keep);
     // 学生IDが2列目にあるシートから、その学生の行を消す
-    [SHEETS.studentLogs, SHEETS.entries, SHEETS.records].forEach(function (def) {
+    [SHEETS.studentLogs, SHEETS.entries, SHEETS.entryLogs, SHEETS.records].forEach(function (def) {
       const all = readRows_(def);
       const rest = all.filter(function (r) { return ids.indexOf(String(r[1]).trim()) < 0; });
       if (rest.length === all.length) return;

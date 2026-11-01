@@ -62,7 +62,7 @@
     /* ---------- 札（タグ） ---------- */
     function enrollTag(v) { return el('span', { class: 'st-tag enroll-' + ENROLL.indexOf(v), text: v }); }
     function jobTag(v) {
-        var k = { '未着手': 0, '選考中': 1, '内定': 2, '選考終了': 3 }[v];
+        var k = { '未着手': 0, '選考中': 1, '内定': 2, '選考終了': 3, '就職先決定': 4 }[v];
         return el('span', { class: 'st-tag job-' + (k == null ? 0 : k), text: v });
     }
     function courseTag(v) { return el('span', { class: 'st-tag course-' + COURSES.indexOf(v), text: v }); }
@@ -338,6 +338,9 @@
         var c = cls(s.classCode);
         var d = c && dept(c.deptId);
         var logBox = el('div', { class: 'log-box' }, [el('p', { class: 'muted', text: '変更履歴を読み込んでいます…' })]);
+        var entryBox = el('div', {}, [el('p', { class: 'muted', text: '読み込んでいます…' })]);
+        var recordBox = el('div', {}, [el('p', { class: 'muted', text: '読み込んでいます…' })]);
+        var myEntries = [];
         var body = el('div', { class: 'modal-body student-detail' }, [
             el('p', { class: 'detail-kana', text: s.kana || '' }),
             el('dl', { class: 'detail-list' }, [
@@ -351,10 +354,25 @@
                 el('dt', { text: 'メール' }), el('dd', {}, [s.mail ? el('a', { href: 'mailto:' + s.mail, text: s.mail }) : document.createTextNode('—')]),
                 el('dt', { text: '在籍状態' }), el('dd', {}, [enrollTag(s.enroll), purgeNote(s)]),
                 el('dt', { text: '希望進路' }), el('dd', {}, [courseTag(s.course)]),
-                el('dt', { text: '就活の状況' }), el('dd', {}, [jobTag(s.job), el('span', { class: 'muted detail-note', text: '応募の結果から自動で決まります' })]),
+                el('dt', { text: '就活の状況' }), el('dd', {}, [jobTag(s.job), el('span', { class: 'muted detail-note', text: '応募の結果から自動で決まります（応募管理）' })]),
                 el('dt', { text: '取得資格' }), el('dd', {}, [qualTags(s.quals)]),
                 el('dt', { text: 'メモ' }), el('dd', { class: 'detail-memo', text: s.memo || '—' })
             ]),
+            el('h3', { class: 'detail-h' }, [document.createTextNode('応募'),
+                window.REntries ? el('button', { type: 'button', class: 'btn btn-sm h-btn', onclick: function () {
+                    dlg.close();
+                    REntries.openEntryForm(null, s, function (res) { if (res.jobStatus) { s.job = res.jobStatus; draw(); } setTimeout(function () { openDetail(s.id); }, 60); });
+                } }, [RUI.icon('i-plus'), el('span', { text: '応募を登録' })]) : null,
+                el('a', { href: '#entries?student=' + encodeURIComponent(s.id), class: 'h-link', onclick: function () { dlg.close(); } }, [el('span', { text: '応募管理で見る' })])
+            ]),
+            entryBox,
+            el('h3', { class: 'detail-h' }, [document.createTextNode('指導記録'),
+                el('button', { type: 'button', class: 'btn btn-sm h-btn', onclick: function () {
+                    dlg.close();
+                    REntries.openRecordForm(s, null, myEntries, '', function () { setTimeout(function () { openDetail(s.id); }, 60); });
+                } }, [RUI.icon('i-plus'), el('span', { text: '記録を追加' })])
+            ]),
+            recordBox,
             el('h3', { class: 'detail-h', text: '変更履歴（クラス・在籍状態など）' }),
             logBox
         ]);
@@ -371,6 +389,17 @@
         ]);
         var dlg = RUI.modal(s.name, body, foot);
         dlg.classList.add('r-modal-wide');
+
+        // 応募と指導記録
+        RApi.post('records', { studentId: s.id }).then(function (res) {
+            if (!res || !res.ok) { entryBox.replaceChildren(el('p', { class: 'muted', text: (res && res.message) || '読み込めませんでした。' })); recordBox.replaceChildren(); return; }
+            myEntries = res.entries;
+            entryBox.replaceChildren(res.entries.length ? el('ul', { class: 'mini-entries' }, res.entries.map(function (e) {
+                return el('li', {}, [el('span', { class: 'mini-company', text: e.company }), REntries.stageTag(e.stage), REntries.resultTag(e.result),
+                    e.nextDate ? el('span', { class: 'muted', text: '次：' + e.nextDate.slice(5).replace('-', '/') + (e.nextTime ? ' ' + e.nextTime : '') + (e.nextNote ? ' ' + e.nextNote : '') }) : null]);
+            })) : el('p', { class: 'muted', text: 'まだ応募はありません。' }));
+            recordBox.replaceChildren(REntries.recordList(res.records, s, res.entries, function () { dlg.close(); setTimeout(function () { openDetail(s.id); }, 60); }));
+        }).catch(function () { entryBox.replaceChildren(el('p', { class: 'muted', text: '読み込めませんでした。' })); });
 
         RApi.post('studentLogs', { studentId: s.id }).then(function (res) {
             logBox.replaceChildren();

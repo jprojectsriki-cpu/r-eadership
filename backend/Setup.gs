@@ -48,7 +48,7 @@ const SHEETS = {
       6: ['男性', '女性', 'その他', '回答しない'],
       12: ['在籍', '休学', '退学', '除籍', '卒業'],
       13: ['就職希望', '進学希望', '帰国希望', '未定'],
-      14: ['未着手', '選考中', '内定', '選考終了']
+      14: ['未着手', '選考中', '内定', '就職先決定', '選考終了']
     },
     // 列を足したときに、登録済みの学生に入れる値
     defaults: { '在籍状態': '在籍', '希望進路': '未定' }
@@ -61,13 +61,19 @@ const SHEETS = {
   },
   entries: {
     name: '応募',
-    headers: ['応募ID', '学生ID', '会社名', '職種', '勤務地', '給与', '選考の段階', '結果', '応募日', '次の予定日', '次の予定の内容', 'メモ', '作成日時', '更新日時', '更新した教員'],
-    widths: [110, 110, 200, 140, 120, 110, 170, 100, 100, 100, 160, 240, 140, 140, 110],
-    textCols: 12,
+    headers: ['応募ID', '学生ID', '会社名', '職種', '勤務地', '給与', '選考の段階', '結果', '応募日', '次の予定日', '次の予定の時刻', '次の予定の内容', 'メモ', '作成日時', '更新日時', '更新した教員'],
+    widths: [90, 90, 200, 140, 120, 110, 120, 90, 100, 100, 90, 180, 240, 140, 140, 110],
+    textCols: 16,
     lists: {
-      7: ['書類送付済', '一次面接日程調整中', '二次面接日程調整中', '最終面接日程調整中', '選考終了'],
-      8: ['選考中', '内定獲得', '不採用', '辞退']
+      7: ['エントリー', '書類選考', '筆記・適性検査', '一次面接', '二次面接', '最終面接'],
+      8: ['選考中', '内定', '内定承諾', '不採用', '辞退']
     }
+  },
+  entryLogs: {
+    name: '選考の履歴',
+    headers: ['履歴ID', '学生ID', '応募ID', '日時', '選考の段階', '結果', '更新した教員'],
+    widths: [90, 90, 90, 140, 120, 90, 110],
+    textCols: 7
   },
   records: {
     name: '指導記録',
@@ -193,22 +199,36 @@ function upgradeMasters() {
  * - もう直してあるときは何もしないので、2回実行しても大丈夫
  */
 function upgradeStudents() {
-  const def = SHEETS.students;
+  addMissingColumns_(SHEETS.students);
+  setupSheets();
+  testSheets();
+}
+
+/**
+ * 【シートの形を新しくするときに実行】応募シートに足りない列（次の予定の時刻）を足し、「選考の履歴」シートを作る（L-9）
+ * もう直してあるときは何もしないので、2回実行しても大丈夫
+ */
+function upgradeEntries() {
+  addMissingColumns_(SHEETS.entries);
+  setupSheets();
+  testSheets();
+}
+
+/** 見出しの順番どおりに、足りない列をその場所に入れる（入力済みのデータは右にずれるだけ） */
+function addMissingColumns_(def) {
   const sheet = getSheet_(def.name);
   def.headers.forEach(function (h, k) {
     const lastCol = Math.max(sheet.getLastColumn(), 1);
     const now = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (x) { return String(x).trim(); });
     if (now[k] === h) return;
-    if (now.indexOf(h) >= 0) throw new Error('学生シートの列「' + h + '」の場所が、思っていた場所とちがいます。列を手で動かしていないか確認してください。');
+    if (now.indexOf(h) >= 0) throw new Error(def.name + 'シートの列「' + h + '」の場所が、思っていた場所とちがいます。列を手で動かしていないか確認してください。');
     if (k === 0) sheet.insertColumnBefore(1); else sheet.insertColumnAfter(k);
     sheet.getRange(1, k + 1).setValue(h);
     const last = sheet.getLastRow();
     const v = (def.defaults || {})[h];
     if (v && last >= 2) sheet.getRange(2, k + 1, last - 1, 1).setValue(v);
-    Logger.log('学生：' + (k + 1) + '列目に「' + h + '」の列を足しました' + (v && last >= 2 ? '（登録済みの学生 ' + (last - 1) + '人は「' + v + '」）' : ''));
+    Logger.log(def.name + '：' + (k + 1) + '列目に「' + h + '」の列を足しました' + (v && last >= 2 ? '（登録済みの ' + (last - 1) + '行は「' + v + '」）' : ''));
   });
-  setupSheets();
-  testSheets();
 }
 
 /** シートを名前で取得する（なければエラー） */
