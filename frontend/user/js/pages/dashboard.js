@@ -315,7 +315,17 @@
             RApi.post('entries', {}),
             RApi.post('masters', {})
         ]).then(function (res) {
-            if (!res[0].ok || !res[1].ok || !res[2].ok) { RUI.toast('読み込めませんでした。', 'error'); return; }
+            // どのデータが読み込めなかったかを、画面に出す（原因を調べやすくするため）
+            var names = ['学生名簿（students）', '応募（entries）', '学科・クラス・資格（masters）'];
+            var bad = res.map(function (r, i) { return r && r.ok ? null : names[i] + '：' + ((r && r.message) || '返事がありません'); }).filter(Boolean);
+            if (bad.length) {
+                RUI.toast('読み込めませんでした。', 'error');
+                root.replaceChildren(el('section', { class: 'panel' }, [
+                    el('p', { class: 'empty', text: 'ダッシュボードのデータを読み込めませんでした。' }),
+                    el('ul', { class: 'import-error' }, bad.map(function (m) { return el('li', { text: m }); }))
+                ]));
+                return;
+            }
             data.students = res[0].students;
             data.fiscalYear = res[0].fiscalYear;
             data.entries = res[1].entries;
