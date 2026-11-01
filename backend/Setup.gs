@@ -113,13 +113,17 @@ function setupSheets() {
     if (def.textCols) sheet.getRange(2, 1, rows, def.textCols).setNumberFormat('@');
     sheet.getRange(2, 1, rows, cols).setVerticalAlignment('top');
 
-    Object.keys(def.lists || {}).forEach(function (col) {
-      const rule = SpreadsheetApp.newDataValidation()
-        .requireValueInList(def.lists[col], true)
-        .setAllowInvalid(false)
-        .build();
-      sheet.getRange(2, Number(col), rows, 1).setDataValidation(rule);
-    });
+    // プルダウンを付けなおす。プルダウンのない列は、入力の決まり（データの入力規則）を消す
+    // （列を足したとき、となりの列のプルダウンが引きつがれて、入力できなくなるのを防ぐため）
+    for (let col = 1; col <= cols; col++) {
+      const list = (def.lists || {})[col];
+      const range = sheet.getRange(2, col, rows, 1);
+      if (list) {
+        range.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(list, true).setAllowInvalid(false).build());
+      } else {
+        range.clearDataValidations();
+      }
+    }
 
     def.widths.forEach(function (w, i) { sheet.setColumnWidth(i + 1, w); });
   });
