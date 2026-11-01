@@ -49,6 +49,21 @@ window.RApi = (function () {
         });
     }
 
+    /**
+     * いくつかの読み込みを同時に行い、全部そろうまでローディングを出す
+     *   RApi.all([['students'], ['masters'], ['entries', { ... }]], '学生名簿を読み込んでいます') → Promise<[結果, 結果, …]>
+     */
+    function all(list, loadingText) {
+        var L = window.RLoading;
+        if (L) L.show(loadingText || '読み込んでいます');
+        // 画面を描き終わってから消すため、消すのは少しあと（呼んだ側の then が先に動く）
+        var later = function () { if (L) setTimeout(L.hide, 0); };
+        return Promise.all(list.map(function (x) { return post(x[0], x[1] || {}); })).then(
+            function (res) { later(); return res; },
+            function (err) { later(); throw err; }
+        );
+    }
+
     function logout() {
         var token = load(TOKEN_KEY);
         clearToken();
@@ -59,5 +74,5 @@ window.RApi = (function () {
         p.catch(function () { /* 画面ではログアウト済みにする */ }).then(go);
     }
 
-    return { post: post, logout: logout, hasSession: hasSession, toLogin: toLogin };
+    return { post: post, all: all, logout: logout, hasSession: hasSession, toLogin: toLogin };
 })();

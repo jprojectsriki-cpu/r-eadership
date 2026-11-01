@@ -332,14 +332,25 @@
     /* =========================================================
      * 詳しい画面
      * ========================================================= */
+    // 応募・指導記録・変更履歴を先に読み込み、そろってから詳しい画面を開く（読み込み中の表示を出さないため）
     function openDetail(id) {
+        if (!data.students.some(function (x) { return x.id === id; })) return;
+        RApi.all([['records', { studentId: id }], ['studentLogs', { studentId: id }]], '学生の情報を読み込んでいます').then(function (res) {
+            showDetail(id, res[0], res[1]);
+        }).catch(function (err) {
+            console.error(err);
+            RUI.toast('通信に失敗しました。時間をおいてもう一度お試しください。', 'error');
+        });
+    }
+
+    function showDetail(id, recRes, logRes) {
         var s = data.students.find(function (x) { return x.id === id; });
         if (!s) return;
         var c = cls(s.classCode);
         var d = c && dept(c.deptId);
-        var logBox = el('div', { class: 'log-box' }, [el('p', { class: 'muted', text: '変更履歴を読み込んでいます…' })]);
-        var entryBox = el('div', {}, [el('p', { class: 'muted', text: '読み込んでいます…' })]);
-        var recordBox = el('div', {}, [el('p', { class: 'muted', text: '読み込んでいます…' })]);
+        var logBox = el('div', { class: 'log-box' });
+        var entryBox = el('div', {});
+        var recordBox = el('div', {});
         var myEntries = [];
         var body = el('div', { class: 'modal-body student-detail' }, [
             el('p', { class: 'detail-kana', text: s.kana || '' }),
@@ -392,7 +403,7 @@
         dlg.classList.add('r-modal-wide');
 
         // 応募と指導記録
-        RApi.post('records', { studentId: s.id }).then(function (res) {
+        (function (res) {
             if (!res || !res.ok) { entryBox.replaceChildren(el('p', { class: 'muted', text: (res && res.message) || '読み込めませんでした。' })); recordBox.replaceChildren(); return; }
             myEntries = res.entries;
             entryBox.replaceChildren(res.entries.length ? el('ul', { class: 'mini-entries' }, res.entries.map(function (e) {
@@ -400,9 +411,9 @@
                     e.nextDate ? el('span', { class: 'muted', text: '次：' + e.nextDate.slice(5).replace('-', '/') + (e.nextTime ? ' ' + e.nextTime : '') + (e.nextNote ? ' ' + e.nextNote : '') }) : null]);
             })) : el('p', { class: 'muted', text: 'まだ応募はありません。' }));
             recordBox.replaceChildren(REntries.recordList(res.records, s, res.entries, function () { dlg.close(); setTimeout(function () { openDetail(s.id); }, 60); }));
-        }).catch(function () { entryBox.replaceChildren(el('p', { class: 'muted', text: '読み込めませんでした。' })); });
+        })(recRes);
 
-        RApi.post('studentLogs', { studentId: s.id }).then(function (res) {
+        (function (res) {
             logBox.replaceChildren();
             if (!res || !res.ok) { logBox.append(el('p', { class: 'muted', text: (res && res.message) || '読み込めませんでした。' })); return; }
             if (!res.logs.length) { logBox.append(el('p', { class: 'muted', text: 'まだ変更はありません。' })); return; }
@@ -413,7 +424,7 @@
                     el('p', { class: 'log-meta', text: l.at + '　' + l.by })
                 ]);
             })));
-        }).catch(function () { logBox.replaceChildren(el('p', { class: 'muted', text: '読み込めませんでした。' })); });
+        })(logRes);
     }
 
     function age(birth) {
@@ -688,8 +699,7 @@
         admin = ctx.isAdmin;
         root = el('div', { class: 'page-students' });
         body.append(root);
-        root.append(el('section', { class: 'panel' }, [el('p', { class: 'empty', text: '読み込んでいます…' })]));
-        Promise.all([RApi.post('students', {}, '学生名簿を読み込んでいます'), RApi.post('masters', {})]).then(function (res) {
+        RApi.all([['students'], ['masters']], '学生名簿を読み込んでいます').then(function (res) {
             if (!res[0] || !res[0].ok || !res[1] || !res[1].ok) { RUI.toast('読み込めませんでした。', 'error'); return; }
             data.students = res[0].students;
             data.fiscalYear = res[0].fiscalYear;

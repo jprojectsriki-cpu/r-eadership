@@ -121,17 +121,21 @@
         $('pwBtn2').addEventListener('click', changePassword);
         window.addEventListener('hashchange', route);
 
-        RApi.post('me', {}, 'ログイン状態を確認しています')
+        // 最初の画面の読み込みが終わるまで、ローディングを出し続ける（画面の読み込みが自分のローディングを重ねるため）
+        RLoading.show('ログイン状態を確認しています');
+        RApi.post('me', {})
             .then(function (res) {
-                if (!res || !res.ok) { RApi.toLogin('expired'); return; }
+                if (!res || !res.ok) { RLoading.hide(); RApi.toLogin('expired'); return; }
                 user = res.user;
                 window.RApp = { user: user }; // 画面（js/pages）から、ログインしている人の情報を見るため
                 showUser();
                 $('app').hidden = false;
                 route();
+                RLoading.hide();
             })
             .catch(function (err) {
                 console.error(err);
+                RLoading.hide();
                 RApi.toLogin('error');
             });
     }

@@ -396,12 +396,23 @@
     }
 
     /* ---------- 詳しい画面 ---------- */
+    // 選考の履歴と指導記録を先に読み込み、そろってから詳しい画面を開く（読み込み中の表示を出さないため）
     function openDetail(id) {
+        if (!data.entries.some(function (x) { return x.id === id; })) return;
+        RApi.all([['entryDetail', { entryId: id }]], '応募の情報を読み込んでいます').then(function (res) {
+            showDetail(id, res[0]);
+        }).catch(function (err) {
+            console.error(err);
+            RUI.toast('通信に失敗しました。時間をおいてもう一度お試しください。', 'error');
+        });
+    }
+
+    function showDetail(id, detailRes) {
         var e = data.entries.find(function (x) { return x.id === id; });
         if (!e) return;
         var s = student(e.studentId) || { id: e.studentId, name: '（不明）', studentNo: '' };
-        var progressBox = el('div', { class: 'progress-box' }, [el('p', { class: 'muted', text: '読み込んでいます…' })]);
-        var recordBox = el('div', {}, [el('p', { class: 'muted', text: '読み込んでいます…' })]);
+        var progressBox = el('div', { class: 'progress-box' });
+        var recordBox = el('div', {});
         var reopen = function () { setTimeout(function () { openDetail(id); }, 60); };
         var body = el('div', { class: 'modal-body student-detail' }, [
             el('dl', { class: 'detail-list' }, [
@@ -440,7 +451,7 @@
         var dlg = RUI.modal(e.company, body, foot);
         dlg.classList.add('r-modal-wide');
 
-        RApi.post('entryDetail', { entryId: e.id }).then(function (res) {
+        (function (res) {
             if (!res || !res.ok) { progressBox.replaceChildren(el('p', { class: 'muted', text: (res && res.message) || '読み込めませんでした。' })); return; }
             // 実際に通った段階だけを、通った順に表示する（とばした段階は出さない）
             var passed = [];
@@ -457,7 +468,7 @@
             }));
             progressBox.replaceChildren(steps, el('details', { class: 'log-details' }, [el('summary', { text: '更新の履歴（' + res.logs.length + '件）' }), logList]));
             recordBox.replaceChildren(recordList(res.records, s, data.entries.filter(function (x) { return x.studentId === s.id; }), function () { dlg.close(); reopen(); }));
-        }).catch(function () { progressBox.replaceChildren(el('p', { class: 'muted', text: '読み込めませんでした。' })); });
+        })(detailRes);
     }
 
     function render(body, ctx) {
@@ -465,8 +476,7 @@
         page = 1;
         root = el('div', { class: 'page-entries' });
         body.append(root);
-        root.append(el('section', { class: 'panel' }, [el('p', { class: 'empty', text: '読み込んでいます…' })]));
-        Promise.all([RApi.post('entries', {}, '応募を読み込んでいます'), RApi.post('students', {}), RApi.post('masters', {})]).then(function (res) {
+        RApi.all([['entries'], ['students'], ['masters']], '応募を読み込んでいます').then(function (res) {
             if (!res[0] || !res[0].ok || !res[1] || !res[1].ok || !res[2] || !res[2].ok) { RUI.toast('読み込めませんでした。', 'error'); return; }
             data.entries = res[0].entries;
             data.today = res[0].today;

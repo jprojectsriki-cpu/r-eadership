@@ -171,11 +171,7 @@
         me = ctx.user;
         root = el('div', { class: 'page-teachers' });
         body.append(root);
-        root.append(el('section', { class: 'panel' }, [el('p', { class: 'empty', text: '読み込んでいます…' })]));
-        Promise.all([
-            RApi.post('teachers', {}, '教員アカウントを読み込んでいます'),
-            RApi.post('masters', {})
-        ]).then(function (res) {
+        RApi.all([['teachers'], ['masters']], '教員アカウントを読み込んでいます').then(function (res) {
             if (!res[0] || !res[0].ok) { RUI.toast((res[0] && res[0].message) || '読み込めませんでした。', 'error'); return; }
             data.teachers = res[0].teachers;
             data.departments = (res[1] && res[1].departments) || [];

@@ -366,6 +366,8 @@ input[type=file] { font: inherit; font-size: 0.88rem; }
 .seg:last-child { border-radius: 0 8px 8px 0; }
 .seg-label { font-size: 0.8rem; font-weight: 800; color: #fff; white-space: nowrap; }
 .seg-label.is-dark { color: var(--dark); }
+.seg-label small { margin-left: 4px; font-size: 0.72rem; font-weight: 700; opacity: 0.85; }
+.seg-pct { font-family: var(--font-en); font-size: 0.76rem; color: var(--text-muted); }
 .seg-empty { margin: auto; font-size: 0.8rem; color: var(--text-muted); }
 .seg-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; list-style: none; margin-top: 10px; font-size: 0.8rem; }
 .seg-legend li { display: flex; align-items: center; gap: 6px; }

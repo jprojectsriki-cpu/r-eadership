@@ -213,8 +213,8 @@
     function render(body) {
         root = el('div', { class: 'page-classes' });
         body.append(root);
-        root.append(el('section', { class: 'panel' }, [el('p', { class: 'empty', text: '読み込んでいます…' })]));
-        RApi.post('masters', {}, '学科・クラス・資格を読み込んでいます').then(function (res) {
+        RApi.all([['masters']], '学科・クラス・資格を読み込んでいます').then(function (all) {
+            var res = all[0];
             if (!res || !res.ok) { RUI.toast((res && res.message) || '読み込めませんでした。', 'error'); return; }
             data.departments = res.departments || [];
             data.classes = res.classes || [];

@@ -118,12 +118,15 @@
         parts.forEach(function (p) {
             var share = total ? p.value / total * 100 : 0;
             if (p.value) {
-                var seg = el('div', { class: 'seg', style: 'background:' + p.color + ';width:0' }, [share >= 9 ? el('span', { class: 'seg-label' + (p.light ? ' is-dark' : ''), text: p.value + unit }) : null]);
+                var seg = el('div', { class: 'seg', style: 'background:' + p.color + ';width:0' }, [share >= 9 ? el('span', { class: 'seg-label' + (p.light ? ' is-dark' : '') }, [
+                    document.createTextNode(p.value + unit), share >= 14 ? el('small', { text: Math.round(share) + '%' }) : null
+                ]) : null]);
                 bindTip(seg, p.name + '：' + p.value + unit + '（' + Math.round(share) + '%）');
                 bar.append(seg);
                 segs.push([seg, share]);
             }
-            legend.append(el('li', {}, [el('span', { class: 'swatch', style: 'background:' + p.color }), el('span', { text: p.name }), el('b', { text: p.value + unit })]));
+            legend.append(el('li', {}, [el('span', { class: 'swatch', style: 'background:' + p.color }), el('span', { text: p.name }), el('b', { text: p.value + unit }),
+                el('span', { class: 'seg-pct', text: total ? Math.round(share * 10) / 10 + '%' : '—' })]));
         });
         if (!total) bar.append(el('p', { class: 'seg-empty', text: 'まだデータがありません' }));
         bar.setAttribute('aria-label', parts.map(function (p) { return p.name + ' ' + p.value + unit; }).join('、'));
@@ -309,12 +312,7 @@
         root = el('div', { class: 'page-dashboard' });
         body.append(root);
         if (!tip) { tip = el('div', { class: 'chart-tip', role: 'tooltip', hidden: true }); document.body.append(tip); }
-        root.append(el('section', { class: 'panel' }, [el('p', { class: 'empty', text: '読み込んでいます…' })]));
-        Promise.all([
-            RApi.post('students', {}, 'ダッシュボードを読み込んでいます'),
-            RApi.post('entries', {}),
-            RApi.post('masters', {})
-        ]).then(function (res) {
+        RApi.all([['students'], ['entries'], ['masters']], 'ダッシュボードを読み込んでいます').then(function (res) {
             // どのデータが読み込めなかったかを、画面に出す（原因を調べやすくするため）
             var names = ['学生名簿（students）', '応募（entries）', '学科・クラス・資格（masters）'];
             var bad = res.map(function (r, i) { return r && r.ok ? null : names[i] + '：' + ((r && r.message) || '返事がありません'); }).filter(Boolean);

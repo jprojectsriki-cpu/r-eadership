@@ -2,6 +2,7 @@
  *   RLoading.show('ログインしています')  … 表示（画面の中央で、キューブが回る）
  *   RLoading.hide().then(...)            … 非表示（チラつかないよう、最低限の時間は表示してから消える）
  *   RLoading.wrap('ログインしています', promise) … promise が終わるまで表示する
+ * いくつかの読み込みが重なったときは、すべて終わるまで表示し続ける（show の回数だけ hide されたら消える）
  * 使う画面では、css/loading.css と js/loading.js を読み込む
  * ※ show に渡す文字は、プログラムで決めた固定の文字だけにする（入力された値は渡さない）
  */
@@ -43,24 +44,31 @@ window.RLoading = (function () {
         label = dlg.querySelector('.rl-text');
     }
 
+    // 表示を頼まれている数。いくつかの読み込みが重なっても、全部終わるまで出し続ける
+    var count = 0;
+
     function show(text) {
         if (!dlg) build();
+        count++;
         label.textContent = text || '読み込んでいます';
-        shownAt = Date.now();
         dlg.classList.remove('is-leaving');
         if (!dlg.open) {
+            shownAt = Date.now();
             if (typeof dlg.showModal === 'function') dlg.showModal();
             else dlg.setAttribute('open', '');
         }
     }
 
     function hide() {
+        count = Math.max(0, count - 1);
         return new Promise(function (resolve) {
-            if (!dlg || !dlg.open) { resolve(); return; }
+            if (!dlg || !dlg.open || count > 0) { resolve(); return; }
             var wait = Math.max(0, MIN_SHOW_MS - (Date.now() - shownAt));
             window.setTimeout(function () {
+                if (count > 0) { resolve(); return; } // 待っているあいだに、次の読み込みが始まった
                 dlg.classList.add('is-leaving');
                 window.setTimeout(function () {
+                    if (count > 0) { dlg.classList.remove('is-leaving'); resolve(); return; }
                     if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
                     dlg.classList.remove('is-leaving');
                     resolve();
