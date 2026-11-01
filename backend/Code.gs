@@ -80,7 +80,7 @@ function doPost(e) {
       case 'setEnrollStatuses':
         return json_(setEnrollStatuses_(req.token, req.studentIds, req.status, req.reason));
       case 'updateStudentNotes':
-        return json_(updateStudentNotes_(req.token, req.studentId, req.quals, req.memo, req.course));
+        return json_(updateStudentNotes_(req.token, req.studentId, req.quals, req.memo, req.course, req.school));
       case 'entries':
         return json_(listEntries_(req.token));
       case 'entryDetail':

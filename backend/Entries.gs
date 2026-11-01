@@ -206,9 +206,12 @@ function updateEntryProgress_(token, entryId, p) {
   const nextNote = cleanText_(p.nextNote, MAX_NAME_LEN);
   if (STAGES.indexOf(stage) < 0) return { ok: false, message: '選考の段階を選んでください。' };
   if (RESULTS.indexOf(result) < 0) return { ok: false, message: '結果を選んでください。' };
-  if (nextDate.error) return { ok: false, message: nextDate.error };
-  if (nextTime.error) return { ok: false, message: nextTime.error };
-  if (nextTime.value && !nextDate.value) return { ok: false, message: '時刻を入れるときは、次の予定日も入れてください。' };
+  // 次の予定は「選考中」のときだけ使う（それ以外では消すので、確かめない）
+  if (result === '選考中') {
+    if (nextDate.error) return { ok: false, message: nextDate.error };
+    if (nextTime.error) return { ok: false, message: nextTime.error };
+    if (nextTime.value && !nextDate.value) return { ok: false, message: '時刻を入れるときは、次の予定日も入れてください。' };
+  }
 
   return withLock_(function () {
     const sheet = getSheet_(SHEETS.entries.name);

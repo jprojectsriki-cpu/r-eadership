@@ -16,7 +16,7 @@ const MAX_IMPORT_ROWS = 500;
 // 学生シートの列（0から数える）。Setup.gs の SHEETS.students.headers と同じ順番
 const ST = {
   id: 0, no: 1, name: 2, kana: 3, birth: 4, gender: 5, nation: 6, tel: 7, mail: 8,
-  cls: 9, grad: 10, enroll: 11, course: 12, job: 13, quals: 14, memo: 15, created: 16, updated: 17
+  cls: 9, grad: 10, enroll: 11, course: 12, school: 13, job: 14, quals: 15, memo: 16, created: 17, updated: 18
 };
 const GENDERS = ['男性', '女性', 'その他', '回答しない'];
 const COURSES = ['就職希望', '進学希望', '帰国希望', '未定'];
@@ -41,6 +41,7 @@ function studentFromRow_(r) {
     gradYear: text(r[ST.grad]),
     enroll: text(r[ST.enroll]) || '在籍',
     course: text(r[ST.course]) || '未定',
+    school: text(r[ST.school]),
     job: text(r[ST.job]) || JOB_STATUS_DEFAULT,
     quals: String(r[ST.quals]).split(',').map(function (x) { return x.trim(); }).filter(String),
     memo: String(r[ST.memo] == null ? '' : r[ST.memo]),
@@ -53,7 +54,7 @@ function newStudentRow_(id, p, classCode, gradYear, now) {
   const row = new Array(SHEETS.students.headers.length).fill('');
   row[ST.id] = id; row[ST.no] = p.studentNo; row[ST.name] = p.name; row[ST.kana] = p.kana;
   row[ST.birth] = p.birth; row[ST.gender] = p.gender; row[ST.nation] = p.nation; row[ST.tel] = p.tel; row[ST.mail] = p.mail;
-  row[ST.cls] = classCode; row[ST.grad] = gradYear; row[ST.enroll] = '在籍'; row[ST.course] = p.course || '未定';
+  row[ST.cls] = classCode; row[ST.grad] = gradYear; row[ST.enroll] = '在籍'; row[ST.course] = p.course || '未定'; row[ST.school] = p.school || '';
   row[ST.job] = JOB_STATUS_DEFAULT; row[ST.created] = now; row[ST.updated] = now;
   return row;
 }
@@ -72,7 +73,8 @@ function cleanBasic_(item) {
     nation: cleanText_(item.nation, 30),
     tel: cleanText_(item.tel, 20).replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }).replace(/[ー－‐−]/g, '-'),
     mail: cleanText_(item.mail, 100),
-    course: cleanText_(item.course, 10)
+    course: cleanText_(item.course, 10),
+    school: cleanText_(item.school, MAX_NAME_LEN)
   };
   if (!v.studentNo) return { error: '学籍番号を入力してください。' };
   if (!v.name) return { error: '名前を入力してください。' };
@@ -272,7 +274,7 @@ function deleteStudent_(token, studentId) {
 
 /**
  * CSVでまとめて登録（学校管理者だけ）
- * rows：[{ studentNo, name, kana, birth, gender, nation, tel, mail, course, cls, gradYear }]（cls はクラスコード・クラス名・ラベルのどれでもよい）
+ * rows：[{ studentNo, name, kana, birth, gender, nation, tel, mail, course, school, cls, gradYear }]（cls はクラスコード・クラス名・ラベルのどれでもよい）
  * dryRun が true なら、確かめるだけで登録しない。1件でもまちがいがあれば、1件も登録しない
  */
 function importStudents_(token, rows, dryRun) {
@@ -471,11 +473,12 @@ function setEnrollStatuses_(token, ids, status, reason) {
 function moveStudent_(token, studentId, toClass, reason) { return moveStudents_(token, [studentId], toClass, reason); }
 function setEnrollStatus_(token, studentId, status, reason) { return setEnrollStatuses_(token, [studentId], status, reason); }
 
-/** 希望進路・取得資格・メモの変更（担当の教員もできる） */
-function updateStudentNotes_(token, studentId, quals, memo, course) {
+/** 希望進路（進学予定先）・取得資格・メモの変更（担当の教員もできる） */
+function updateStudentNotes_(token, studentId, quals, memo, course, school) {
   const s = checkSession_(token);
   if (!s.ok) return s;
   course = String(course || '').trim();
+  school = cleanText_(school, MAX_NAME_LEN);
   if (course && COURSES.indexOf(course) < 0) return { ok: false, message: '希望進路を選んでください。' };
   const known = readRows_(SHEETS.qualifications).map(function (r) { return String(r[0]).trim(); });
   const list = (Array.isArray(quals) ? quals : []).map(function (q) { return String(q).trim(); }).filter(function (q, i, a) { return q && a.indexOf(q) === i; });
@@ -490,6 +493,13 @@ function updateStudentNotes_(token, studentId, quals, memo, course) {
     if (course && course !== f.student.course) {
       r[ST.course] = course;
       addStudentLog_(f.student.id, '希望進路', f.student.course, course, '希望進路の変更', s.user.teacherId);
+    }
+    // 進学予定先は、希望進路が「進学希望」のときだけ持つ
+    const nextCourse = course || f.student.course;
+    const nextSchool = nextCourse === '進学希望' ? school : '';
+    if (nextSchool !== f.student.school) {
+      addStudentLog_(f.student.id, '進学予定先', f.student.school || '（なし）', nextSchool || '（なし）', '進学予定先の変更', s.user.teacherId);
+      r[ST.school] = nextSchool;
     }
     r[ST.quals] = list.join(','); r[ST.memo] = memo; r[ST.updated] = now;
     getSheet_(SHEETS.students.name).getRange(f.index + 2, 1, 1, r.length).setValues([r]);

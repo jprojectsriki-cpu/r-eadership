@@ -15,8 +15,8 @@
 
     var el = function () { return RUI.el.apply(null, arguments); };
     var ENROLL = ['在籍', '休学', '退学', '除籍', '卒業'];
-    var CSV_HEADERS = ['学籍番号', '名前', 'ふりがな', '生年月日', '性別', '国籍', '電話番号', 'メールアドレス', '希望進路', 'クラス', '卒業予定年度'];
-    var CSV_KEYS = ['studentNo', 'name', 'kana', 'birth', 'gender', 'nation', 'tel', 'mail', 'course', 'cls', 'gradYear'];
+    var CSV_HEADERS = ['学籍番号', '名前', 'ふりがな', '生年月日', '性別', '国籍', '電話番号', 'メールアドレス', '希望進路', '進学予定先', 'クラス', '卒業予定年度'];
+    var CSV_KEYS = ['studentNo', 'name', 'kana', 'birth', 'gender', 'nation', 'tel', 'mail', 'course', 'school', 'cls', 'gradYear'];
     var CSV_REQUIRED = ['学籍番号', '名前', 'クラス'];
     var GENDERS = ['男性', '女性', 'その他', '回答しない'];
     var COURSES = ['就職希望', '進学希望', '帰国希望', '未定'];
@@ -353,7 +353,7 @@
                 el('dt', { text: '電話番号' }), el('dd', {}, [s.tel ? el('a', { href: 'tel:' + s.tel.replace(/[^0-9+]/g, ''), text: s.tel }) : document.createTextNode('—')]),
                 el('dt', { text: 'メール' }), el('dd', {}, [s.mail ? el('a', { href: 'mailto:' + s.mail, text: s.mail }) : document.createTextNode('—')]),
                 el('dt', { text: '在籍状態' }), el('dd', {}, [enrollTag(s.enroll), purgeNote(s)]),
-                el('dt', { text: '希望進路' }), el('dd', {}, [courseTag(s.course)]),
+                el('dt', { text: '希望進路' }), el('dd', {}, [courseTag(s.course), s.course === '進学希望' ? el('span', { class: 'detail-note', text: '進学予定先：' + (s.school || '（未入力）') }) : null]),
                 el('dt', { text: '就活の状況' }), el('dd', {}, [jobTag(s.job), el('span', { class: 'muted detail-note', text: '応募の結果から自動で決まります（応募管理）' })]),
                 el('dt', { text: '取得資格' }), el('dd', {}, [qualTags(s.quals)]),
                 el('dt', { text: 'メモ' }), el('dd', { class: 'detail-memo', text: s.memo || '—' })
@@ -500,12 +500,14 @@
             title: s.name + 'さんの希望進路・取得資格・メモ',
             fields: [
                 { name: 'course', label: '希望進路', type: 'select', required: true, value: s.course, options: COURSES.map(function (v) { return { value: v, label: v }; }), hint: '変えると変更履歴に残ります。' },
+                { name: 'school', label: '進学予定先', value: s.school, maxlength: 50, placeholder: '例：〇〇大学 経済学部', hint: '希望進路が「進学希望」のときに入れます。ダッシュボードの進学先のグラフに使います。' },
                 { name: 'quals', label: '取得資格', type: 'checks', value: s.quals, options: opts, emptyText: '資格がまだありません。学校管理者が「学科・クラス・資格」で登録します。' },
                 { name: 'memo', label: 'メモ', type: 'textarea', value: s.memo, maxlength: 1000, placeholder: '指導のメモなど' }
             ],
             submitLabel: '保存する',
+            onChange: function (form) { form.elements.school.disabled = form.elements.course.value !== '進学希望'; },
             onSubmit: function (v) {
-                return RApi.post('updateStudentNotes', { studentId: s.id, quals: v.quals, memo: v.memo, course: v.course }, '保存しています').then(function (res) { return afterSave(res, s.id); });
+                return RApi.post('updateStudentNotes', { studentId: s.id, quals: v.quals, memo: v.memo, course: v.course, school: v.school }, '保存しています').then(function (res) { return afterSave(res, s.id); });
             }
         });
     }
@@ -576,7 +578,7 @@
     function csvEscape(v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
     function downloadTemplate() {
         var sample = data.classes[0];
-        var lines = [CSV_HEADERS.join(','), ['2026001', '比嘉 太郎', 'ひが たろう', '2006-04-01', '男性', '日本', '090-1234-5678', 'taro@example.com', '就職希望', sample ? short(sample) : 'クラスのラベル', ''].map(csvEscape).join(',')];
+        var lines = [CSV_HEADERS.join(','), ['2026001', '比嘉 太郎', 'ひが たろう', '2006-04-01', '男性', '日本', '090-1234-5678', 'taro@example.com', '就職希望', '', sample ? short(sample) : 'クラスのラベル', ''].map(csvEscape).join(',')];
         var blob = new Blob(['﻿' + lines.join('\r\n') + '\r\n'], { type: 'text/csv' });
         var a = el('a', { href: URL.createObjectURL(blob), download: '学生名簿_ひな形.csv' });
         document.body.append(a); a.click(); a.remove();
@@ -617,7 +619,7 @@
         var body = el('div', { class: 'modal-body' }, [
             el('ol', { class: 'import-steps' }, [
                 el('li', {}, [document.createTextNode('ひな形をダウンロードして、Excelなどで学生を入力します。'), el('button', { type: 'button', class: 'btn btn-sm', onclick: downloadTemplate }, [RUI.icon('i-download'), el('span', { text: 'ひな形（CSV）' })])]),
-                el('li', { text: '必ず入れるのは「学籍番号」「名前」「クラス」です。「クラス」には、クラスのラベル・クラス名・クラスコードのどれかを入れます。ほかの列は空でもかまいません（卒業予定年度は自動で入ります。希望進路は「就職希望・進学希望・帰国希望・未定」、性別は「男性・女性・その他・回答しない」、生年月日は「2006-04-01」の形）。' }),
+                el('li', { text: '必ず入れるのは「学籍番号」「名前」「クラス」です。「クラス」には、クラスのラベル・クラス名・クラスコードのどれかを入れます。ほかの列は空でもかまいません（卒業予定年度は自動で入ります。希望進路は「就職希望・進学希望・帰国希望・未定」、進学予定先は進学希望のときの学校名、性別は「男性・女性・その他・回答しない」、生年月日は「2006-04-01」の形）。' }),
                 el('li', { text: 'CSV形式で保存したファイルを選びます。まず内容を確かめ、まちがいがなければ「登録する」を押します。' })
             ]),
             el('div', { class: 'form-field' }, [el('label', { for: 'csvFile', class: 'field-label', text: 'CSVファイル' }), fileInput]),
