@@ -40,10 +40,16 @@ const SHEETS = {
   },
   students: {
     name: '学生',
-    headers: ['学生ID', '学籍番号', '名前', 'ふりがな', 'クラスコード', '卒業予定年度', '状況', '取得資格', 'メモ', '登録日時', '更新日時'],
-    widths: [110, 100, 140, 160, 110, 100, 90, 200, 240, 140, 140],
-    textCols: 9,
-    lists: { 7: ['未着手', '選考中', '内定', '選考終了'] }
+    headers: ['学生ID', '学籍番号', '名前', 'ふりがな', 'クラスコード', '卒業予定年度', '在籍状態', '状況', '取得資格', 'メモ', '登録日時', '更新日時'],
+    widths: [90, 100, 140, 160, 100, 100, 80, 90, 200, 240, 140, 140],
+    textCols: 12,
+    lists: { 7: ['在籍', '休学', '退学', '除籍', '卒業'], 8: ['未着手', '選考中', '内定', '選考終了'] }
+  },
+  studentLogs: {
+    name: '学生の変更履歴',
+    headers: ['履歴ID', '学生ID', '日時', '項目', '変更前', '変更後', '理由', '変更した教員'],
+    widths: [90, 90, 140, 100, 160, 160, 300, 110],
+    textCols: 8
   },
   entries: {
     name: '応募',
@@ -169,6 +175,25 @@ function upgradeMasters() {
       classSheet.getRange(i + 2, 4).setValue(made[dept]);
     });
   }
+  testSheets();
+}
+
+/**
+ * 【1回だけ実行】学生シートに「在籍状態」の列を足し、「学生の変更履歴」シートを作る（L-8）
+ * 卒業予定年度の右（G列）に列を入れ、登録済みの学生は「在籍」にする。もう直してあるときは何もしない
+ */
+function upgradeStudents() {
+  const sheet = getSheet_(SHEETS.students.name);
+  if (String(sheet.getRange(1, 7).getValue()).trim() === '在籍状態') {
+    Logger.log('学生：在籍状態の列はすでにあります');
+  } else {
+    sheet.insertColumnAfter(6);
+    sheet.getRange(1, 7).setValue('在籍状態');
+    const last = sheet.getLastRow();
+    if (last >= 2) sheet.getRange(2, 7, last - 1, 1).setValue('在籍');
+    Logger.log('学生：G列に在籍状態の列を足しました（登録済みの学生 ' + Math.max(0, last - 1) + '人は「在籍」にしました）');
+  }
+  setupSheets();
   testSheets();
 }
 

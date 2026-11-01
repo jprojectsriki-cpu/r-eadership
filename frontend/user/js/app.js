@@ -122,6 +122,7 @@
             .then(function (res) {
                 if (!res || !res.ok) { RApi.toLogin('expired'); return; }
                 user = res.user;
+                window.RApp = { user: user }; // 画面（js/pages）から、ログインしている人の情報を見るため
                 showUser();
                 $('app').hidden = false;
                 route();

@@ -7,6 +7,7 @@
  *                 type（text／password／textarea／select／checks〈チェックの一覧・値は配列〉／static〈表示だけ〉）, options（select・checks のとき） }]
  *   RUI.notice(title, [要素], okLabel) → Promise  … OKだけのお知らせの画面
  *   RUI.copyText(text) → Promise<true/false>      … 文字をコピーする
+ *   RUI.modal(title, body要素, footer要素, danger) → dialog … 自由な中身のダイアログ
  *      onChange(form, name) … 入力が変わったときに呼ばれる（ほかの欄の選択肢を変えるときに使う）
  *      onSubmit(values) / onDelete() は Promise を返す。結果が { ok: false, message } なら画面にエラーを出して閉じない
  */
@@ -60,9 +61,16 @@ window.RUI = (function () {
     // options: [{ value, label }]。value が '' のものは「選んでください」などの見出しに使う
     function setOptions(select, options, value) {
         select.replaceChildren();
+        var groupEl = null;
         options.forEach(function (o) {
             var op = el('option', { value: String(o.value), text: o.label });
-            select.append(op);
+            if (o.group) {
+                if (!groupEl || groupEl.label !== o.group) { groupEl = el('optgroup', { label: o.group }); select.append(groupEl); }
+                groupEl.append(op);
+            } else {
+                groupEl = null;
+                select.append(op);
+            }
         });
         if (value != null && options.some(function (o) { return String(o.value) === String(value); })) select.value = String(value);
     }
@@ -193,5 +201,5 @@ window.RUI = (function () {
         return dlg;
     }
 
-    return { el: el, icon: icon, toast: toast, confirm: confirm, form: form, notice: notice, copyText: copyText, setOptions: setOptions };
+    return { el: el, icon: icon, toast: toast, confirm: confirm, form: form, notice: notice, copyText: copyText, setOptions: setOptions, modal: modal };
 })();

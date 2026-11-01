@@ -61,6 +61,22 @@ function doPost(e) {
         return json_(resetTeacherPassword_(req.token, req.teacherId));
       case 'changeMyPassword':
         return json_(changeMyPassword_(req.token, req.currentPassword, req.newPassword));
+      case 'students':
+        return json_(listStudents_(req.token));
+      case 'studentLogs':
+        return json_(studentLogs_(req.token, req.studentId));
+      case 'saveStudent':
+        return json_(saveStudent_(req.token, req.item));
+      case 'deleteStudent':
+        return json_(deleteStudent_(req.token, req.studentId));
+      case 'importStudents':
+        return json_(importStudents_(req.token, req.rows, req.dryRun === true));
+      case 'moveStudent':
+        return json_(moveStudent_(req.token, req.studentId, req.toClass, req.reason));
+      case 'setEnrollStatus':
+        return json_(setEnrollStatus_(req.token, req.studentId, req.status, req.reason));
+      case 'updateStudentNotes':
+        return json_(updateStudentNotes_(req.token, req.studentId, req.quals, req.memo));
       default:
         return json_({ ok: false, message: '不明な操作です。' });
     }

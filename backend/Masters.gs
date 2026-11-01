@@ -268,7 +268,7 @@ function deleteQualification_(token, id) {
     if (i < 0) return { ok: false, message: 'この資格は見つかりません。画面を読み込み直してください。' };
 
     const used = readRows_(SHEETS.students).filter(function (r) {
-      return String(r[7]).split(',').map(function (x) { return x.trim(); }).indexOf(id) >= 0;
+      return String(r[8]).split(',').map(function (x) { return x.trim(); }).indexOf(id) >= 0; // 取得資格（I列）
     }).length;
     if (used) return { ok: false, message: 'この資格は学生 ' + used + ' 人の取得資格に登録されているため、削除できません。' };
 
