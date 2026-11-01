@@ -361,6 +361,7 @@
             el('h3', { class: 'detail-h' }, [document.createTextNode('応募'),
                 window.REntries ? el('button', { type: 'button', class: 'btn btn-sm h-btn', onclick: function () {
                     dlg.close();
+                    REntries.useClasses(data.classes);
                     REntries.openEntryForm(null, s, function (res) { if (res.jobStatus) { s.job = res.jobStatus; draw(); } setTimeout(function () { openDetail(s.id); }, 60); });
                 } }, [RUI.icon('i-plus'), el('span', { text: '応募を登録' })]) : null,
                 el('a', { href: '#entries?student=' + encodeURIComponent(s.id), class: 'h-link', onclick: function () { dlg.close(); } }, [el('span', { text: '応募管理で見る' })])

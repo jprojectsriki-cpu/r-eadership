@@ -59,29 +59,76 @@
         var s = student(studentId);
         if (s && job) s.job = job;
     }
-    function studentOptions() {
-        var opts = [{ value: '', label: '選んでください' }];
-        data.classes.forEach(function (c) {
-            data.students.filter(function (s) { return s.classCode === c.code && s.enroll === '在籍'; })
-                .sort(function (a, b) { return a.studentNo.localeCompare(b.studentNo, 'ja', { numeric: true }); })
-                .forEach(function (s) { opts.push({ value: s.id, label: s.studentNo + '　' + s.name, group: short(c) }); });
+    var PICK_MAX = 50; // 選択肢に出す最大の人数（多いときは、しぼりこんでもらう）
+
+    /** 学生の表示名：「1年 情報1A 比嘉 太郎（2026001）」。同姓同名でも区別できるように学年・クラス・学籍番号を付ける */
+    function studentLabel(s) {
+        var c = cls(s.classCode);
+        return (c ? c.grade + '年 ' + short(c) + ' ' : '') + s.name + '（' + s.studentNo + '）' + (s.enroll === '在籍' ? '' : '［' + s.enroll + '］');
+    }
+
+    /**
+     * 学生の選択肢
+     * f：{ grade, cls, q }（学年・クラス・名前などの検索）。在籍の学生を先に、学年・クラス・学籍番号の順に並べる
+     * 当てはまる学生が PICK_MAX 人より多いときは、最初の PICK_MAX 人だけを出し、しぼりこむよう知らせる
+     */
+    function studentOptions(f) {
+        f = f || {};
+        var q = String(f.q || '').trim().toLowerCase();
+        var list = data.students.filter(function (s) {
+            var c = cls(s.classCode);
+            if (f.grade && (!c || String(c.grade) !== String(f.grade))) return false;
+            if (f.cls && s.classCode !== f.cls) return false;
+            return !q || (s.name + ' ' + s.kana + ' ' + s.studentNo).toLowerCase().indexOf(q) >= 0;
         });
-        return opts;
+        var order = function (s) { var c = cls(s.classCode); return c ? data.classes.indexOf(c) : 9999; };
+        list.sort(function (a, b) {
+            return (a.enroll === '在籍' ? 0 : 1) - (b.enroll === '在籍' ? 0 : 1) || order(a) - order(b) || a.studentNo.localeCompare(b.studentNo, 'ja', { numeric: true });
+        });
+        var head = !list.length ? '当てはまる学生がいません'
+            : list.length > PICK_MAX ? list.length + '人います。学年・クラス・名前でしぼりこんでください（最初の' + PICK_MAX + '人を表示）'
+            : '選んでください（' + list.length + '人）';
+        return [{ value: '', label: head }].concat(list.slice(0, PICK_MAX).map(function (s) { return { value: s.id, label: studentLabel(s) }; }));
+    }
+    // 学年の選択肢（登録されているクラスの学年）
+    function gradeOptions() {
+        var gs = data.classes.map(function (c) { return c.grade; }).filter(function (g, i, a) { return a.indexOf(g) === i; }).sort();
+        return [{ value: '', label: 'すべての学年' }].concat(gs.map(function (g) { return { value: String(g), label: g + '年' }; }));
+    }
+    function classOptionsFor(grade) {
+        return [{ value: '', label: 'すべてのクラス' }].concat(data.classes.filter(function (c) { return !grade || String(c.grade) === String(grade); })
+            .map(function (c) { return { value: c.code, label: c.grade + '年 ' + short(c) }; }));
     }
 
     /* =========================================================
      * 入力画面（学生名簿からも使う）
      * ========================================================= */
 
+    /** しぼりこみに合わせて、学生の選択肢を入れかえる（1人だけになったら、その学生を選ぶ） */
+    function refreshPick(form) {
+        var opts = studentOptions({ grade: form.elements.pickGrade.value, cls: form.elements.pickClass.value, q: form.elements.pickQ.value });
+        var keep = form.elements.studentId.value;
+        if (opts.length === 2) keep = opts[1].value;
+        RUI.setOptions(form.elements.studentId, opts, keep);
+    }
+
     /** 応募の登録・会社などの情報の変更。fixedStudent を渡すと、その学生で登録する */
     function openEntryForm(entry, fixedStudent, onDone) {
         var isNew = !entry;
         entry = entry || {};
         var fields = [];
-        if (isNew && !fixedStudent) fields.push({ name: 'studentId', label: '学生', type: 'select', required: true, options: studentOptions(), hint: '在籍している学生を、クラスごとに並べています。' });
+        if (isNew && !fixedStudent) {
+            fields.push(
+                { name: 'pickGrade', label: '学年でしぼる', type: 'select', options: gradeOptions() },
+                { name: 'pickClass', label: 'クラスでしぼる', type: 'select', options: classOptionsFor('') },
+                { name: 'pickQ', label: '名前・学籍番号でさがす', maxlength: 30, placeholder: '名前・ふりがな・学籍番号の一部', autocomplete: 'off' },
+                { name: 'studentId', label: '学生', type: 'select', required: true, options: studentOptions(),
+                  hint: data.students.length ? '「学年 クラス 名前（学籍番号）」で表示しています。在籍している学生が先です。' : '学生名簿に学生が登録されていません。' }
+            );
+        }
         else {
             var st = fixedStudent || student(entry.studentId) || {};
-            fields.push({ name: 'studentView', label: '学生', type: 'static', value: (st.studentNo ? st.studentNo + '　' : '') + (st.name || '') });
+            fields.push({ name: 'studentView', label: '学生', type: 'static', value: st.id ? studentLabel(st) : '' });
         }
         fields.push(
             { name: 'company', label: '会社名', value: entry.company, required: true, maxlength: 50, placeholder: '例：株式会社沖縄商事' },
@@ -91,18 +138,28 @@
             { name: 'applied', label: '応募日', value: entry.applied || today(), type: 'date' },
             { name: 'memo', label: 'メモ', value: entry.memo, type: 'textarea', maxlength: 1000 }
         );
-        RUI.form({
+        var picker = isNew && !fixedStudent;
+        var dlg = RUI.form({
             title: isNew ? '応募を登録' : '応募の情報を変更',
             fields: fields,
+            // クラスや「さがす」に入れた文字で、学生の選択肢をしぼる
+            onChange: picker ? function (form, name) {
+                if (name === 'pickGrade') RUI.setOptions(form.elements.pickClass, classOptionsFor(form.elements.pickGrade.value), form.elements.pickClass.value);
+                if (name === 'pickGrade' || name === 'pickClass') refreshPick(form);
+            } : null,
             submitLabel: isNew ? '登録する' : '変更を保存する',
             onSubmit: function (v) {
-                var item = { id: entry.id, studentId: fixedStudent ? fixedStudent.id : v.studentId, company: v.company, job: v.job, place: v.place, salary: v.salary, applied: v.applied, memo: v.memo };
+                var item = { id: entry.id, studentId: fixedStudent ? fixedStudent.id : (entry.studentId || v.studentId), company: v.company, job: v.job, place: v.place, salary: v.salary, applied: v.applied, memo: v.memo };
                 return RApi.post('saveEntry', { item: item }, isNew ? '登録しています' : '保存しています').then(function (res) {
                     if (res && res.ok) { RUI.toast(res.message); if (onDone) onDone(res); }
                     return res;
                 });
             }
         });
+        if (picker) {
+            var f = dlg.querySelector('form');
+            f.elements.pickQ.addEventListener('input', function () { refreshPick(f); });
+        }
     }
 
     /** 選考の進み具合（段階・結果・次の予定）の更新 */
@@ -191,7 +248,9 @@
     window.REntries = {
         STAGES: STAGES, RESULTS: RESULTS,
         stageTag: stageTag, resultTag: resultTag,
-        openEntryForm: openEntryForm, openRecordForm: openRecordForm, recordList: recordList
+        openEntryForm: openEntryForm, openRecordForm: openRecordForm, recordList: recordList,
+        // 学生名簿から使うとき、クラスの情報を渡す（学生の表示名「学年 クラス 名前」を作るため）
+        useClasses: function (classes) { if (!data.classes.length) data.classes = classes.slice(); }
     };
 
     /* =========================================================
@@ -346,7 +405,7 @@
         var reopen = function () { setTimeout(function () { openDetail(id); }, 60); };
         var body = el('div', { class: 'modal-body student-detail' }, [
             el('dl', { class: 'detail-list' }, [
-                el('dt', { text: '学生' }), el('dd', { text: s.studentNo + '　' + s.name + '（' + (short(cls(s.classCode)) || '—') + '）' }),
+                el('dt', { text: '学生' }), el('dd', { text: s.id ? studentLabel(s) : s.name }),
                 el('dt', { text: '職種' }), el('dd', { text: e.job || '—' }),
                 el('dt', { text: '勤務地' }), el('dd', { text: e.place || '—' }),
                 el('dt', { text: '給与' }), el('dd', { text: e.salary || '—' }),
