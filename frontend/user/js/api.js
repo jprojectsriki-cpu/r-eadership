@@ -10,7 +10,7 @@ window.RApi = (function () {
 
     var TOKEN_KEY = 'readership_token';
     var SCHOOL_KEY = 'readership_school';
-    var AUTH_REASONS = ['expired', 'replaced', 'stopped'];
+    var AUTH_REASONS = ['expired', 'replaced', 'stopped', 'changed'];
 
     function load(key) { try { return localStorage.getItem(key) || ''; } catch (e) { return ''; } }
     function clearToken() { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* 無視 */ } }

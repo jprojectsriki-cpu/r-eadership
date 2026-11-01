@@ -49,6 +49,18 @@ function doPost(e) {
         return json_(saveQualification_(req.token, req.item));
       case 'deleteQualification':
         return json_(deleteQualification_(req.token, req.id));
+      case 'teachers':
+        return json_(listTeachers_(req.token));
+      case 'createTeacher':
+        return json_(createTeacher_(req.token, req.item));
+      case 'updateTeacher':
+        return json_(updateTeacher_(req.token, req.item));
+      case 'setTeacherStatus':
+        return json_(setTeacherStatus_(req.token, req.teacherId, req.stop === true));
+      case 'resetTeacherPassword':
+        return json_(resetTeacherPassword_(req.token, req.teacherId));
+      case 'changeMyPassword':
+        return json_(changeMyPassword_(req.token, req.currentPassword, req.newPassword));
       default:
         return json_({ ok: false, message: '不明な操作です。' });
     }

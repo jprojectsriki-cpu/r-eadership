@@ -66,7 +66,7 @@ function login_(schoolCode, teacherId, password) {
 
 /**
  * トークンを確認する
- * 戻り値：{ ok: true, user } または { ok: false, reason: 'expired' | 'replaced' | 'stopped', message }
+ * 戻り値：{ ok: true, user } または { ok: false, reason: 'expired' | 'replaced' | 'stopped' | 'changed', message }
  */
 function checkSession_(token) {
   const cache = CacheService.getScriptCache();
@@ -79,6 +79,10 @@ function checkSession_(token) {
   if (current === 'stopped') {
     cache.remove('session_' + token);
     return { ok: false, reason: 'stopped', message: 'このアカウントは現在ご利用いただけません。学校管理者にお問い合わせください。' };
+  }
+  if (current === 'changed') {
+    cache.remove('session_' + token);
+    return { ok: false, reason: 'changed', message: 'アカウントの設定が変わったため、ログアウトしました。もう一度ログインしてください。' };
   }
   if (current !== token) {
     cache.remove('session_' + token);

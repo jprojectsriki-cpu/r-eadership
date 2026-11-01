@@ -70,6 +70,28 @@
         window.scrollTo(0, 0);
     }
 
+    /* ---------- 自分のパスワードの変更 ---------- */
+    function changePassword() {
+        setMenu(false);
+        RUI.form({
+            title: 'パスワード変更',
+            fields: [
+                { name: 'current', label: 'いまのパスワード', type: 'password', required: true, maxlength: 64, autocomplete: 'current-password', hint: '学校管理者から仮のパスワードを受け取ったときは、それを入力します。' },
+                { name: 'next', label: '新しいパスワード', type: 'password', required: true, maxlength: 64, autocomplete: 'new-password', hint: '8〜64文字。ほかのサービスと同じものは使わないでください。' },
+                { name: 'next2', label: '新しいパスワード（確認）', type: 'password', required: true, maxlength: 64, autocomplete: 'new-password' }
+            ],
+            submitLabel: '変更する',
+            onSubmit: function (v) {
+                if (v.next.length < 8) return Promise.resolve({ ok: false, message: '新しいパスワードは、8文字以上にしてください。' });
+                if (v.next !== v.next2) return Promise.resolve({ ok: false, message: '新しいパスワードが、確認の欄と一致しません。' });
+                return RApi.post('changeMyPassword', { currentPassword: v.current, newPassword: v.next }, '変更しています').then(function (res) {
+                    if (res && res.ok) RUI.toast(res.message);
+                    return res;
+                });
+            }
+        });
+    }
+
     /* ---------- 開いたとき ---------- */
     function showUser() {
         $('schoolName').textContent = user.schoolName;
@@ -92,6 +114,8 @@
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
         $('logoutBtn').addEventListener('click', RApi.logout);
         $('logoutBtn2').addEventListener('click', RApi.logout);
+        $('pwBtn').addEventListener('click', changePassword);
+        $('pwBtn2').addEventListener('click', changePassword);
         window.addEventListener('hashchange', route);
 
         RApi.post('me', {}, 'ログイン状態を確認しています')
