@@ -17,6 +17,16 @@
 
     function deptById(id) { return data.departments.find(function (d) { return d.id === id; }) || null; }
     function shortName(x) { return x ? (x.label || x.name) : ''; }
+    // すでにある学科でいちばん多い修業年限（学科がまだなければ空）。学科を追加するときの初めの値に使う
+    function commonYears() {
+        var count = {};
+        var best = '';
+        data.departments.forEach(function (d) {
+            count[d.years] = (count[d.years] || 0) + 1;
+            if (!best || count[d.years] > count[best]) best = d.years;
+        });
+        return best;
+    }
     function countClasses(deptId) { return data.classes.filter(function (c) { return c.deptId === deptId; }).length; }
 
     var KINDS = {
@@ -35,7 +45,7 @@
                 return [
                     { name: 'name', label: '学科名', value: item.name, required: true, maxlength: 50, placeholder: '例：情報システム科' },
                     { name: 'label', label: 'ラベル', value: item.label, maxlength: 20, placeholder: '例：情報', hint: LABEL_HINT },
-                    { name: 'years', label: '修業年限', value: item.years, required: true, type: 'select', options: years, hint: 'クラスの学年は、1年からこの年数までの中から選べます。' }
+                    { name: 'years', label: '修業年限', value: item.years || commonYears(), required: true, type: 'select', options: years, hint: 'クラスの学年は、1年からこの年数までの中から選べます。学科を追加するときは、すでにある学科でいちばん多い年数が最初から選ばれています。' }
                 ];
             },
             empty: '学科はまだありません。「学科を追加」から登録してください。クラスを登録する前に、学科の登録が必要です。'
