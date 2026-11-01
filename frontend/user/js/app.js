@@ -14,7 +14,7 @@
         entries:   { title: '応募管理', desc: '学生ごとの応募（エントリー）と、選考の流れを記録します。', step: 'L-9' },
         notices:   { title: 'お知らせ', desc: '全体・学校管理者・個人の先生に向けて連絡します。要望・意見は「学校管理者」あてに送ります。', step: 'L-11' },
         teachers:  { title: '教員アカウント', desc: '教員アカウントの発行・停止、担当クラス、パスワードの再設定を行います。', step: 'L-7', admin: true },
-        classes:   { title: 'クラス・資格', desc: 'クラスと資格を登録します。', step: 'L-6', admin: true }
+        classes:   { title: '学科・クラス・資格', desc: '学科（修業年限）・クラス・資格を登録します。学生名簿のプルダウンで使います。', step: 'L-6', admin: true }
     };
     var user = null;
 

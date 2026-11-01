@@ -19,17 +19,24 @@ const SHEETS = {
     textCols: 7, // A〜G列は「書式なしテキスト」にする
     lists: { 5: ['学校管理者', '教員'], 7: ['利用中', '停止中'] }
   },
+  departments: {
+    name: '学科',
+    headers: ['学科ID', '学科名', 'ラベル', '修業年限', '作成日時'],
+    widths: [90, 220, 110, 80, 140],
+    textCols: 3,
+    lists: { 4: ['1', '2', '3', '4'] }
+  },
   classes: {
     name: 'クラス',
-    headers: ['クラスコード', 'クラス名', '学科', '学年', '作成日時'],
-    widths: [110, 180, 160, 70, 140],
+    headers: ['クラスコード', 'クラス名', 'ラベル', '学科ID', '学年', '作成日時'],
+    widths: [110, 200, 110, 90, 70, 140],
     textCols: 4
   },
   qualifications: {
     name: '資格',
-    headers: ['資格ID', '資格名', '分類', '説明', '作成日時'],
-    widths: [110, 220, 120, 280, 140],
-    textCols: 4
+    headers: ['資格ID', '資格名', 'ラベル', '分類', '説明', '作成日時'],
+    widths: [110, 220, 110, 120, 280, 140],
+    textCols: 5
   },
   students: {
     name: '学生',
@@ -118,6 +125,51 @@ function setupSheets() {
   ss.setActiveSheet(settings);
 
   Logger.log('シートを準備しました（全' + Object.keys(SHEETS).length + 'シート）。新しく作ったシート：' + (made.length ? made.join('、') : 'なし'));
+}
+
+/**
+ * 【1回だけ実行】学科・ラベルを使う形にシートを直す（L-6c）
+ * 1. 「学科」シートを作る（setupSheets）
+ * 2. 「クラス」「資格」シートの名前の右（C列）に「ラベル」の列を入れる（入力済みのデータは右にずれるだけ）
+ * 3. 「クラス」シートの学科が文字で入っていたら、学科シートに学科を作って学科ID（D001など）に置きかえる
+ *    （修業年限は、その学科のクラスの一番上の学年。2年より小さいときは2年。あとで画面から直せる）
+ * もう直してあるところは何もしないので、2回実行しても大丈夫
+ */
+function upgradeMasters() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  [SHEETS.classes, SHEETS.qualifications].forEach(function (def) {
+    const sheet = ss.getSheetByName(def.name);
+    if (!sheet) return;
+    if (String(sheet.getRange(1, 3).getValue()).trim() === 'ラベル') {
+      Logger.log(def.name + '：ラベルの列はすでにあります');
+      return;
+    }
+    sheet.insertColumnAfter(2);
+    sheet.getRange(1, 3).setValue('ラベル');
+    Logger.log(def.name + '：C列にラベルの列を足しました');
+  });
+
+  setupSheets(); // 学科シートを作り、見出し・書式をそろえる
+
+  const classSheet = getSheet_(SHEETS.classes.name);
+  const deptSheet = getSheet_(SHEETS.departments.name);
+  const last = classSheet.getLastRow();
+  if (last >= 2) {
+    const rows = classSheet.getRange(2, 1, last - 1, 5).getValues();
+    const made = {};
+    rows.forEach(function (r, i) {
+      const dept = String(r[3]).trim();
+      if (!dept || /^D\d+$/.test(dept)) return;
+      if (!made[dept]) {
+        const years = Math.min(4, Math.max(2, Math.max.apply(null, rows.filter(function (x) { return String(x[3]).trim() === dept; }).map(function (x) { return Number(x[4]) || 0; }))));
+        made[dept] = nextId_(readRows_(SHEETS.departments), 'D');
+        deptSheet.appendRow([made[dept], dept, '', years, nowText_()]);
+        Logger.log('学科を作りました：' + made[dept] + ' ' + dept + '（' + years + '年制）');
+      }
+      classSheet.getRange(i + 2, 4).setValue(made[dept]);
+    });
+  }
+  testSheets();
 }
 
 /** シートを名前で取得する（なければエラー） */

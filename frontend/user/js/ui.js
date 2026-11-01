@@ -3,7 +3,8 @@
  *   RUI.toast('保存しました')  /  RUI.toast('エラー', 'error')  … 右下に短いお知らせ
  *   RUI.confirm({ title, message, okLabel, danger }) → Promise<true/false>  … 確認の画面
  *   RUI.form({ title, fields, submitLabel, onSubmit, deleteLabel, onDelete }) … 入力の画面
- *      fields: [{ name, label, value, required, placeholder, maxlength, hint, type }]
+ *      fields: [{ name, label, value, required, placeholder, maxlength, hint, type（text／textarea／select）, options（select のとき） }]
+ *      onChange(form, name) … 入力が変わったときに呼ばれる（ほかの欄の選択肢を変えるときに使う）
  *      onSubmit(values) / onDelete() は Promise を返す。結果が { ok: false, message } なら画面にエラーを出して閉じない
  */
 window.RUI = (function () {
@@ -30,6 +31,17 @@ window.RUI = (function () {
         use.setAttribute('href', '#' + id);
         svg.append(use);
         return svg;
+    }
+
+    /* ---------- プルダウンの選択肢を入れかえる ---------- */
+    // options: [{ value, label }]。value が '' のものは「選んでください」などの見出しに使う
+    function setOptions(select, options, value) {
+        select.replaceChildren();
+        options.forEach(function (o) {
+            var op = el('option', { value: String(o.value), text: o.label });
+            select.append(op);
+        });
+        if (value != null && options.some(function (o) { return String(o.value) === String(value); })) select.value = String(value);
     }
 
     /* ---------- 右下のお知らせ ---------- */
@@ -71,11 +83,17 @@ window.RUI = (function () {
         var f = el('form', { class: 'modal-form', novalidate: true });
         (opt.fields || []).forEach(function (fd, i) {
             var id = 'ff-' + Date.now() + '-' + i;
-            var input = el(fd.type === 'textarea' ? 'textarea' : 'input', {
-                id: id, name: fd.name, type: fd.type === 'textarea' ? null : (fd.type || 'text'),
-                placeholder: fd.placeholder, maxlength: fd.maxlength, rows: fd.type === 'textarea' ? 3 : null
-            });
-            input.value = fd.value || '';
+            var input;
+            if (fd.type === 'select') {
+                input = el('select', { id: id, name: fd.name });
+                setOptions(input, fd.options || [], fd.value);
+            } else {
+                input = el(fd.type === 'textarea' ? 'textarea' : 'input', {
+                    id: id, name: fd.name, type: fd.type === 'textarea' ? null : (fd.type || 'text'),
+                    placeholder: fd.placeholder, maxlength: fd.maxlength, rows: fd.type === 'textarea' ? 3 : null
+                });
+                input.value = fd.value == null ? '' : fd.value;
+            }
             f.append(el('div', { class: 'form-field' }, [
                 el('label', { for: id }, [document.createTextNode(fd.label), fd.required ? el('em', { class: 'req', text: '必須' }) : el('em', { text: '任意' })]),
                 input,
@@ -105,6 +123,9 @@ window.RUI = (function () {
             });
         }
 
+        // 入力し直したら、エラーの文を消す
+        f.addEventListener('input', function () { msg.textContent = ''; });
+        f.addEventListener('change', function () { msg.textContent = ''; });
         cancel.addEventListener('click', function () { dlg.close(); });
         submit.addEventListener('click', function (e) { e.preventDefault(); f.requestSubmit ? f.requestSubmit() : f.dispatchEvent(new Event('submit', { cancelable: true })); });
         f.addEventListener('submit', function (e) {
@@ -115,14 +136,19 @@ window.RUI = (function () {
                 values[fd.name] = f.elements[fd.name].value.trim();
                 if (fd.required && !values[fd.name] && !missing) missing = fd;
             });
-            if (missing) { msg.textContent = missing.label + 'を入力してください。'; f.elements[missing.name].focus(); return; }
+            if (missing) { msg.textContent = missing.label + (missing.type === 'select' ? 'を選んでください。' : 'を入力してください。'); f.elements[missing.name].focus(); return; }
             run(opt.onSubmit(values));
         });
         if (del) del.addEventListener('click', function () { run(opt.onDelete()); });
-        var first = f.querySelector('input, textarea');
+        // 入力に合わせて、ほかの欄を変えたいとき（例：学科を選んだら学年の選択肢を変える）
+        if (typeof opt.onChange === 'function') {
+            f.addEventListener('change', function (e) { opt.onChange(f, e.target.name); });
+            opt.onChange(f, '');
+        }
+        var first = f.querySelector('input, textarea, select');
         if (first) first.focus();
         return dlg;
     }
 
-    return { el: el, icon: icon, toast: toast, confirm: confirm, form: form };
+    return { el: el, icon: icon, toast: toast, confirm: confirm, form: form, setOptions: setOptions };
 })();

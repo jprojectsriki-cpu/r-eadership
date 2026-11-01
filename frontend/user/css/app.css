@@ -144,12 +144,19 @@ button { font: inherit; color: inherit; }
 .form-field em.req { color: var(--red); }
 .form-field input, .form-field textarea, .form-field select { width: 100%; min-height: 42px; padding: 8px 12px; border: 2px solid #CFC7BA; border-radius: 10px; background: var(--surface); font: inherit; font-size: 16px; color: var(--text); }
 .form-field textarea { resize: vertical; line-height: 1.7; }
+.form-field select { appearance: none; padding-right: 36px; background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E1B18' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 18px; cursor: pointer; }
+.form-field select:disabled { background-color: var(--bg); color: var(--text-muted); cursor: not-allowed; }
 .form-field input:focus, .form-field textarea:focus, .form-field select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(43, 80, 255, 0.18); }
 .field-hint { margin-top: 4px; font-size: 0.78rem; color: var(--text-muted); }
 .form-error { min-height: 1.4em; font-size: 0.86rem; font-weight: 800; color: var(--red); }
 .form-error:empty { min-height: 0; }
 .btn-danger-ghost { border-color: transparent; box-shadow: none; background: transparent; color: var(--red); }
 .btn-danger-ghost:hover { border-color: var(--red); box-shadow: 2px 2px 0 var(--red); background: #FFF0F3; }
+.btn-danger-line { color: var(--red); border-color: var(--red); box-shadow: 2px 2px 0 var(--red); }
+.btn-danger-line:hover { background: #FFF0F3; box-shadow: 3px 3px 0 var(--red); }
+.row-actions { display: inline-flex; gap: 8px; }
+.label-tag { display: inline-block; padding: 1px 10px; border: 1.5px solid var(--dark); border-radius: 999px; background: var(--yellow-soft); font-size: 0.8rem; font-weight: 800; white-space: nowrap; }
+.muted { font-size: 0.8rem; color: var(--text-muted); }
 .btn:disabled { opacity: 0.55; cursor: wait; transform: none; }
 
 /* ---------- 右下のお知らせ ---------- */
@@ -190,7 +197,10 @@ button { font: inherit; color: inherit; }
     .data-table tbody tr:last-child { border-bottom: none; }
     .data-table td { display: flex; gap: 10px; padding: 2px 0; border: none; font-size: 0.86rem; }
     .data-table td::before { content: attr(data-label); flex: 0 0 6.5em; font-size: 0.76rem; font-weight: 800; color: var(--text-muted); }
-    .data-table td.cell-main { padding-right: 84px; font-size: 0.98rem; }
+    .data-table td.cell-main { padding-right: 96px; font-size: 0.98rem; }
+    .data-table tr { min-height: 104px; }
+    .row-actions { flex-direction: column; gap: 8px; }
+    .row-actions .btn { justify-content: flex-start; min-width: 76px; }
     .data-table td.cell-main::before { display: none; }
     .data-table td.col-action { position: absolute; top: 10px; right: 12px; width: auto; padding: 0; }
     .data-table td.col-action::before { display: none; }

@@ -37,6 +37,10 @@ function doPost(e) {
         return json_(checkSession_(req.token));
       case 'masters':
         return json_(listMasters_(req.token));
+      case 'saveDepartment':
+        return json_(saveDepartment_(req.token, req.item));
+      case 'deleteDepartment':
+        return json_(deleteDepartment_(req.token, req.id));
       case 'saveClass':
         return json_(saveClass_(req.token, req.item));
       case 'deleteClass':
