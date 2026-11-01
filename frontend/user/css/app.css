@@ -134,7 +134,9 @@ button { font: inherit; color: inherit; }
 .r-modal.is-danger .modal-head { background: #FFE3E9; }
 .r-modal h2 { font-size: 1.05rem; font-weight: 900; }
 .modal-x { width: 34px; height: 34px; }
-.modal-body { padding: 18px; max-height: calc(100vh - 180px); overflow-y: auto; }
+.r-modal[open] { display: flex; flex-direction: column; }
+.r-modal .modal-head, .r-modal .modal-foot { flex: none; }
+.modal-body { flex: 1 1 auto; min-height: 0; padding: 18px; overflow-y: auto; }
 .modal-foot { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-top: 2px solid var(--line); background: var(--bg); }
 .modal-foot .spacer { flex: 1; }
 .modal-foot .btn:not(.btn-danger-ghost):first-of-type { margin-left: auto; }
@@ -214,6 +216,11 @@ button { font: inherit; color: inherit; }
 .enroll-1 { background: #FFF4D6; color: #8A6100; border-color: #B58300; }
 .enroll-2, .enroll-3 { background: #F1F1F1; color: #6A6A6A; border-color: #9A9A9A; }
 .enroll-4 { background: var(--blue-soft); color: var(--blue); border-color: var(--blue); }
+.course-0 { background: #FFF6BF; color: #6B5200; border-color: #B58300; }
+.course-1 { background: #E6FDFF; color: #006B73; border-color: #00A3AD; }
+.course-2 { background: #F3E8FF; color: #6B21A8; border-color: #8B5CF6; }
+.course-3 { background: #F1F1F1; color: #6A6A6A; border-color: #B5B5B5; }
+.detail-list a { color: var(--blue); font-weight: 800; }
 .job-0 { background: #F1F1F1; color: #6A6A6A; border-color: #B5B5B5; }
 .job-1 { background: var(--blue-soft); color: var(--blue); border-color: var(--blue); }
 .job-2 { background: #FFE3E9; color: #C4002B; border-color: #C4002B; }
@@ -242,6 +249,44 @@ button { font: inherit; color: inherit; }
 .import-error ul { margin: 6px 0 0 1.2em; max-height: 180px; overflow-y: auto; }
 .import-title { font-weight: 800; }
 input[type=file] { font: inherit; font-size: 0.88rem; }
+
+/* ---------- 学生名簿：タブ・選択・ページ送り・詰めた表 ---------- */
+.view-tabs { align-items: flex-end; margin: 12px 18px 0; }
+.view-tabs .spacer { flex: 1; }
+.qual-filter { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 0.8rem; font-weight: 800; color: var(--text-muted); }
+.qual-filter select { min-height: 32px; padding: 2px 8px; border: 2px solid #CFC7BA; border-radius: 8px; font: inherit; font-size: 0.84rem; background: var(--surface); }
+.select-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 8px 18px; border-bottom: 1px solid var(--line); }
+.select-bar.is-on { background: var(--blue-soft); border-bottom: 2px solid var(--blue); }
+.select-bar .spacer { flex: 1; }
+.select-count { font-weight: 900; font-size: 0.88rem; }
+.select-hint { white-space: normal; padding: 0; }
+.text-btn { padding: 0; border: none; background: none; color: var(--blue); font-weight: 800; font-size: 0.84rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.col-check { width: 1%; }
+.col-check input { width: 18px; height: 18px; accent-color: var(--blue); cursor: pointer; vertical-align: middle; }
+.data-table.compact td { padding: 6px 12px; font-size: 0.86rem; }
+.data-table.compact th { padding: 8px 12px; }
+.data-table.compact .label-tag, .data-table.compact .st-tag { font-size: 0.72rem; padding: 0 8px; }
+.data-table.compact .cell-student { white-space: nowrap; }
+.data-table.compact .st-name { display: inline; }
+.data-table.compact .kana { display: inline; margin-left: 8px; font-size: 0.7rem; }
+.data-table tbody tr.is-selected { background: #EEF1FF; }
+.cell-num { text-align: right; white-space: nowrap; font-family: var(--font-en); }
+.qual-table th.qual-col { min-width: 64px; text-align: center; white-space: nowrap; }
+.qual-table td.qual-cell { text-align: center; font-weight: 900; color: #157A3B; }
+.qual-table td.qual-cell.has { background: #EAF8EF; }
+.qual-table .sticky-col { position: sticky; z-index: 1; background: var(--surface); }
+.qual-table th.sticky-col { background: var(--bg); z-index: 2; }
+.qual-table .sticky-0 { left: 0; min-width: 92px; }
+.qual-table .sticky-1 { left: 92px; min-width: 120px; box-shadow: 2px 0 0 var(--line); white-space: nowrap; }
+.qual-table tbody tr:hover .sticky-col { background: #FFFDF3; }
+.pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 18px; border-top: 2px solid var(--line); }
+.pager-info { font-size: 0.82rem; font-weight: 800; color: var(--text-muted); }
+.pager-btns { display: flex; align-items: center; gap: 4px; }
+.page-btn { min-width: 34px; height: 34px; padding: 0 8px; border: 2px solid #CFC7BA; border-radius: 8px; background: var(--surface); font-family: var(--font-en); font-weight: 700; cursor: pointer; }
+.page-btn:hover:not(:disabled) { border-color: var(--dark); }
+.page-btn.is-current { border-color: var(--dark); background: var(--yellow); box-shadow: 2px 2px 0 var(--dark); cursor: default; }
+.page-btn:disabled:not(.is-current) { opacity: 0.4; cursor: default; }
+.page-gap { padding: 0 2px; color: var(--text-muted); }
 
 /* ---------- 右下のお知らせ ---------- */
 .toast-box { position: fixed; right: 16px; bottom: 16px; z-index: 100; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
@@ -276,15 +321,15 @@ input[type=file] { font: inherit; font-size: 0.88rem; }
     .page-title { font-size: 1.25rem; }
 }
 @media (max-width: 640px) {
-    /* 表を、1件ずつのカードの形にする */
-    .data-table thead { display: none; }
-    .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
-    .data-table tr { position: relative; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-    .data-table tbody tr:last-child { border-bottom: none; }
-    .data-table td { display: flex; gap: 10px; padding: 2px 0; border: none; font-size: 0.86rem; }
-    .data-table td::before { content: attr(data-label); flex: 0 0 6.5em; font-size: 0.76rem; font-weight: 800; color: var(--text-muted); }
-    .data-table td.cell-main { padding-right: 96px; font-size: 0.98rem; }
-    .data-table tr { min-height: 104px; }
+    /* 表を、1件ずつのカードの形にする（取得資格の ✓ の表は、表のまま横にスクロール） */
+    .data-table:not(.qual-table) thead { display: none; }
+    .data-table:not(.qual-table), .data-table:not(.qual-table) tbody, .data-table:not(.qual-table) tr, .data-table:not(.qual-table) td { display: block; width: 100%; }
+    .data-table:not(.qual-table) tr { position: relative; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .data-table:not(.qual-table) tbody tr:last-child { border-bottom: none; }
+    .data-table:not(.qual-table) td { display: flex; gap: 10px; padding: 2px 0; border: none; font-size: 0.86rem; }
+    .data-table:not(.qual-table) td::before { content: attr(data-label); flex: 0 0 6.5em; font-size: 0.76rem; font-weight: 800; color: var(--text-muted); }
+    .data-table:not(.qual-table) td.cell-main { padding-right: 96px; font-size: 0.98rem; }
+    .data-table:not(.qual-table) tr { min-height: 104px; }
     .row-actions { flex-direction: column; gap: 8px; }
     .row-actions .btn { justify-content: flex-start; min-width: 76px; }
     .data-table td.cell-main::before { display: none; }
@@ -306,9 +351,14 @@ input[type=file] { font: inherit; font-size: 0.88rem; }
     .filter-search { flex: 1 1 0; min-width: 0; }
     .filter-toggle { display: inline-flex; min-height: 36px; }
     .filter-bar:not(.is-open) .filter-more { display: none; }
-    .student-table tr { display: flex; flex-direction: column; }
-    .student-table td.cell-student { order: -1; margin-bottom: 4px; }
-    .student-table td.cell-student::before { display: none; }
+    .student-table tr { display: grid !important; grid-template-columns: 1fr 1fr; gap: 2px 12px; min-height: 0 !important; padding: 10px 14px 10px 44px !important; }
+    .student-table td { display: flex !important; gap: 6px !important; font-size: 0.8rem !important; }
+    .student-table td::before { flex: none !important; font-size: 0.7rem !important; }
+    .student-table td.cell-student { grid-column: 1 / -1; order: -1; padding-right: 0 !important; margin-bottom: 2px; }
+    .student-table td.col-check { position: absolute; left: 12px; top: 10px; width: auto !important; }
+    .student-table td.col-check::before { display: none; }
+    .select-bar.is-on { position: sticky; top: calc(var(--topbar-h) + 6px); z-index: 5; }
+    .select-bar .btn { flex: 1 1 auto; }
     .student-table td.cell-student { padding-right: 0; }
     .detail-list { grid-template-columns: 6em 1fr; }
 }

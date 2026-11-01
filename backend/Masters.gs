@@ -221,7 +221,7 @@ function deleteClass_(token, code) {
     const i = indexOfId_(rows, code);
     if (i < 0) return { ok: false, message: 'このクラスは見つかりません。画面を読み込み直してください。' };
 
-    const students = readRows_(SHEETS.students).filter(function (r) { return String(r[4]).trim() === code; }).length;
+    const students = readRows_(SHEETS.students).filter(function (r) { return String(r[ST.cls]).trim() === code; }).length;
     if (students) return { ok: false, message: 'このクラスには学生が ' + students + ' 人登録されているため、削除できません。先に学生のクラスを移動してください。' };
     const teachers = readRows_(SHEETS.teachers).filter(function (r) {
       return String(r[5]).split(',').map(function (x) { return x.trim(); }).indexOf(code) >= 0;
@@ -280,7 +280,7 @@ function deleteQualification_(token, id) {
     if (i < 0) return { ok: false, message: 'この資格は見つかりません。画面を読み込み直してください。' };
 
     const used = readRows_(SHEETS.students).filter(function (r) {
-      return String(r[8]).split(',').map(function (x) { return x.trim(); }).indexOf(id) >= 0; // 取得資格（I列）
+      return String(r[ST.quals]).split(',').map(function (x) { return x.trim(); }).indexOf(id) >= 0;
     }).length;
     if (used) return { ok: false, message: 'この資格は学生 ' + used + ' 人の取得資格に登録されているため、削除できません。' };
 

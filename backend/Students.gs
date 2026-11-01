@@ -13,23 +13,80 @@ const MAX_REASON_LEN = 200;
 const MAX_MEMO_LEN = 1000;
 const MAX_IMPORT_ROWS = 500;
 
-// 学生シートの列（0から数える）
-const ST = { id: 0, no: 1, name: 2, kana: 3, cls: 4, grad: 5, enroll: 6, job: 7, quals: 8, memo: 9, created: 10, updated: 11 };
+// 学生シートの列（0から数える）。Setup.gs の SHEETS.students.headers と同じ順番
+const ST = {
+  id: 0, no: 1, name: 2, kana: 3, birth: 4, gender: 5, nation: 6, tel: 7, mail: 8,
+  cls: 9, grad: 10, enroll: 11, course: 12, job: 13, quals: 14, memo: 15, created: 16, updated: 17
+};
+const GENDERS = ['男性', '女性', 'その他', '回答しない'];
+const COURSES = ['就職希望', '進学希望', '帰国希望', '未定'];
+const KEEP_YEARS_AFTER_GRADUATION = 3; // 卒業生のデータを残す年数（卒業から3年後の4月以降に削除）
 
 function studentFromRow_(r) {
+  const text = function (v) {
+    if (Object.prototype.toString.call(v) === '[object Date]') return Utilities.formatDate(v, 'Asia/Tokyo', 'yyyy-MM-dd');
+    return String(v == null ? '' : v).trim();
+  };
   return {
-    id: String(r[ST.id]).trim(),
-    studentNo: String(r[ST.no]).trim(),
-    name: String(r[ST.name]).trim(),
-    kana: String(r[ST.kana]).trim(),
-    classCode: String(r[ST.cls]).trim(),
-    gradYear: String(r[ST.grad]).trim(),
-    enroll: String(r[ST.enroll]).trim() || '在籍',
-    job: String(r[ST.job]).trim() || JOB_STATUS_DEFAULT,
+    id: text(r[ST.id]),
+    studentNo: text(r[ST.no]),
+    name: text(r[ST.name]),
+    kana: text(r[ST.kana]),
+    birth: text(r[ST.birth]),
+    gender: text(r[ST.gender]),
+    nation: text(r[ST.nation]),
+    tel: text(r[ST.tel]),
+    mail: text(r[ST.mail]),
+    classCode: text(r[ST.cls]),
+    gradYear: text(r[ST.grad]),
+    enroll: text(r[ST.enroll]) || '在籍',
+    course: text(r[ST.course]) || '未定',
+    job: text(r[ST.job]) || JOB_STATUS_DEFAULT,
     quals: String(r[ST.quals]).split(',').map(function (x) { return x.trim(); }).filter(String),
-    memo: String(r[ST.memo]),
+    memo: String(r[ST.memo] == null ? '' : r[ST.memo]),
     updatedAt: r[ST.updated] instanceof Date ? Utilities.formatDate(r[ST.updated], 'Asia/Tokyo', 'yyyy-MM-dd HH:mm') : String(r[ST.updated] || '')
   };
+}
+
+/** 新しい学生の1行を作る（p は確かめ済みの値） */
+function newStudentRow_(id, p, classCode, gradYear, now) {
+  const row = new Array(SHEETS.students.headers.length).fill('');
+  row[ST.id] = id; row[ST.no] = p.studentNo; row[ST.name] = p.name; row[ST.kana] = p.kana;
+  row[ST.birth] = p.birth; row[ST.gender] = p.gender; row[ST.nation] = p.nation; row[ST.tel] = p.tel; row[ST.mail] = p.mail;
+  row[ST.cls] = classCode; row[ST.grad] = gradYear; row[ST.enroll] = '在籍'; row[ST.course] = p.course || '未定';
+  row[ST.job] = JOB_STATUS_DEFAULT; row[ST.created] = now; row[ST.updated] = now;
+  return row;
+}
+
+/**
+ * 基本情報（学籍番号・名前・ふりがな・生年月日・性別・国籍・電話番号・メールアドレス）を確かめて整える
+ * 戻り値：{ value: {...} } または { error: '…' }
+ */
+function cleanBasic_(item) {
+  const v = {
+    studentNo: cleanText_(item.studentNo, 20),
+    name: cleanText_(item.name, MAX_NAME_LEN),
+    kana: cleanText_(item.kana, MAX_NAME_LEN),
+    birth: cleanText_(item.birth, 10).replace(/\//g, '-'),
+    gender: cleanText_(item.gender, 10),
+    nation: cleanText_(item.nation, 30),
+    tel: cleanText_(item.tel, 20).replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }).replace(/[ー－‐−]/g, '-'),
+    mail: cleanText_(item.mail, 100),
+    course: cleanText_(item.course, 10)
+  };
+  if (!v.studentNo) return { error: '学籍番号を入力してください。' };
+  if (!v.name) return { error: '名前を入力してください。' };
+  if (v.birth) {
+    const m = v.birth.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    const d = m && new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    if (!m || d.getMonth() !== Number(m[2]) - 1 || Number(m[1]) < 1900) return { error: '生年月日は「2005-04-01」のように入力してください。' };
+    v.birth = m[1] + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[3]).padStart(2, '0');
+  }
+  if (v.gender && GENDERS.indexOf(v.gender) < 0) return { error: '性別は「' + GENDERS.join('・') + '」から選んでください。' };
+  if (v.tel && !/^[0-9+()\- ]{10,20}$/.test(v.tel)) return { error: '電話番号を確認してください（数字とハイフン）。' };
+  if (v.mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.mail)) return { error: 'メールアドレスを確認してください。' };
+  if (v.course && COURSES.indexOf(v.course) < 0) return { error: '希望進路は「' + COURSES.join('・') + '」から選んでください。' };
+  return { value: v };
 }
 
 /** いまの年度（4月はじまり） */
@@ -157,20 +214,18 @@ function saveStudent_(token, item) {
   const s = requireAdmin_(token);
   if (!s.ok) return s;
   item = item || {};
-  const studentNo = cleanText_(item.studentNo, 20);
-  const name = cleanText_(item.name, MAX_NAME_LEN);
-  const kana = cleanText_(item.kana, MAX_NAME_LEN);
+  const c = cleanBasic_(item);
+  if (c.error) return { ok: false, message: c.error };
+  const p = c.value;
   const year = cleanYear_(item.gradYear);
-  if (!studentNo) return { ok: false, message: '学籍番号を入力してください。' };
-  if (!name) return { ok: false, message: '名前を入力してください。' };
   if (year.error) return { ok: false, message: year.error };
 
   return withLock_(function () {
     const sheet = getSheet_(SHEETS.students.name);
     const rows = readRows_(SHEETS.students);
     const id = String(item.id || '').trim();
-    const dup = rows.some(function (r) { return String(r[ST.id]).trim() !== id && String(r[ST.no]).trim() === studentNo; });
-    if (dup) return { ok: false, message: '学籍番号「' + studentNo + '」の学生は、すでに登録されています。' };
+    const dup = rows.some(function (r) { return String(r[ST.id]).trim() !== id && String(r[ST.no]).trim() === p.studentNo; });
+    if (dup) return { ok: false, message: '学籍番号「' + p.studentNo + '」の学生は、すでに登録されています。' };
     const now = nowText_();
 
     if (id) {
@@ -179,20 +234,18 @@ function saveStudent_(token, item) {
       const r = rows[i];
       const before = String(r[ST.grad]).trim();
       const gradYear = year.value || before;
-      sheet.getRange(i + 2, ST.no + 1, 1, 3).setValues([[studentNo, name, kana]]);
-      sheet.getRange(i + 2, ST.grad + 1).setValue(gradYear);
-      sheet.getRange(i + 2, ST.updated + 1).setValue(now);
+      r[ST.no] = p.studentNo; r[ST.name] = p.name; r[ST.kana] = p.kana;
+      r[ST.birth] = p.birth; r[ST.gender] = p.gender; r[ST.nation] = p.nation; r[ST.tel] = p.tel; r[ST.mail] = p.mail;
+      r[ST.grad] = gradYear; r[ST.updated] = now;
+      sheet.getRange(i + 2, 1, 1, r.length).setValues([r]);
       if (gradYear !== before) addStudentLog_(id, '卒業予定年度', before, gradYear, '学校管理者が基本情報を変更', s.user.teacherId);
-      r[ST.no] = studentNo; r[ST.name] = name; r[ST.kana] = kana; r[ST.grad] = gradYear; r[ST.updated] = now;
       return { ok: true, item: studentFromRow_(r), message: '学生の情報を変更しました。' };
     }
 
     const classCode = String(item.classCode || '').trim();
     const cls = classMap_()[classCode];
     if (!cls) return { ok: false, message: 'クラスを選んでください。' };
-    const gradYear = year.value || autoGradYear_(cls);
-    const newId = nextId_(rows, 'S');
-    const row = [newId, studentNo, name, kana, classCode, gradYear, '在籍', JOB_STATUS_DEFAULT, '', '', now, now];
+    const row = newStudentRow_(nextId_(rows, 'S'), p, classCode, year.value || autoGradYear_(cls), now);
     sheet.appendRow(row);
     return { ok: true, item: studentFromRow_(row), message: '学生を登録しました。' };
   });
@@ -219,7 +272,7 @@ function deleteStudent_(token, studentId) {
 
 /**
  * CSVでまとめて登録（学校管理者だけ）
- * rows：[{ studentNo, name, kana, cls, gradYear }]（cls はクラスコード・クラス名・ラベルのどれでもよい）
+ * rows：[{ studentNo, name, kana, birth, gender, nation, tel, mail, course, cls, gradYear }]（cls はクラスコード・クラス名・ラベルのどれでもよい）
  * dryRun が true なら、確かめるだけで登録しない。1件でもまちがいがあれば、1件も登録しない
  */
 function importStudents_(token, rows, dryRun) {
@@ -248,19 +301,18 @@ function importStudents_(token, rows, dryRun) {
     const seen = {};
     const ready = rows.map(function (src, n) {
       const line = n + 2; // 1行目は見出し
-      const studentNo = cleanText_(src.studentNo, 20);
-      const name = cleanText_(src.name, MAX_NAME_LEN);
-      const kana = cleanText_(src.kana, MAX_NAME_LEN);
+      const c = cleanBasic_(src);
+      const p = c.value || { studentNo: cleanText_(src.studentNo, 20) };
+      const studentNo = p.studentNo;
       const cls = findClass(src.cls);
       const year = cleanYear_(src.gradYear);
-      if (!studentNo) errors.push(line + '行目：学籍番号がありません。');
-      else if (existing[studentNo]) errors.push(line + '行目：学籍番号「' + studentNo + '」は、すでに登録されています。');
-      else if (seen[studentNo]) errors.push(line + '行目：学籍番号「' + studentNo + '」が、ファイルの中で重なっています。');
-      if (!name) errors.push(line + '行目：名前がありません。');
+      if (c.error) errors.push(line + '行目：' + c.error);
+      if (studentNo && existing[studentNo]) errors.push(line + '行目：学籍番号「' + studentNo + '」は、すでに登録されています。');
+      else if (studentNo && seen[studentNo]) errors.push(line + '行目：学籍番号「' + studentNo + '」が、ファイルの中で重なっています。');
       if (!cls) errors.push(line + '行目：クラス「' + String(src.cls || '') + '」が見つかりません。');
       if (year.error) errors.push(line + '行目：' + year.error);
-      seen[studentNo] = true;
-      return { studentNo: studentNo, name: name, kana: kana, cls: cls, gradYear: year.value };
+      if (studentNo) seen[studentNo] = true;
+      return { p: p, cls: cls, gradYear: year.value };
     });
     if (errors.length) return { ok: false, errors: errors.slice(0, 50), errorCount: errors.length, message: 'CSVに直すところが ' + errors.length + ' か所あります。' };
     if (dryRun) return { ok: true, count: ready.length, message: ready.length + '人を登録できます。' };
@@ -269,8 +321,7 @@ function importStudents_(token, rows, dryRun) {
     const now = nowText_();
     let all = readRows_(SHEETS.students);
     const out = ready.map(function (x) {
-      const id = nextId_(all, 'S');
-      const row = [id, x.studentNo, x.name, x.kana, x.cls.code, x.gradYear || autoGradYear_(x.cls), '在籍', JOB_STATUS_DEFAULT, '', '', now, now];
+      const row = newStudentRow_(nextId_(all, 'S'), x.p, x.cls.code, x.gradYear || autoGradYear_(x.cls), now);
       all.push(row);
       return row;
     });
@@ -293,8 +344,54 @@ function loadStudentFor_(user, studentId) {
   return { index: i, row: rows[i], student: st };
 }
 
-/** クラスの移動（理由は必須） */
-function moveStudent_(token, studentId, toClass, reason) {
+/**
+ * 変更履歴をまとめて足す（1回の書き込みで行う）
+ * logs：[[学生ID, 項目, 変更前, 変更後, 理由, 教員ID], ...]
+ */
+function appendStudentLogs_(logs) {
+  if (!logs.length) return;
+  const sheet = getSheet_(SHEETS.studentLogs.name);
+  const props = PropertiesService.getScriptProperties();
+  const first = Number(nextId_(readRows_(SHEETS.studentLogs), 'H').slice(1));
+  const now = nowText_();
+  const out = logs.map(function (l, i) {
+    return ['H' + String(first + i).padStart(3, '0'), l[0], now, l[1], l[2], l[3], l[4], l[5]];
+  });
+  props.setProperty('SEQ_H', String(first + logs.length - 1));
+  sheet.getRange(sheet.getLastRow() + 1, 1, out.length, out[0].length).setValues(out);
+}
+
+/**
+ * 共通：対象の学生（1人でも、まとめてでも）を読み込み、全員を扱えるかを確かめる
+ * 1人でも扱えない学生がいれば、だれも変更しない
+ */
+function loadTargets_(user, ids) {
+  ids = (Array.isArray(ids) ? ids : [ids]).map(function (x) { return String(x || '').trim(); }).filter(function (x, i, a) { return x && a.indexOf(x) === i; });
+  if (!ids.length) return { error: '学生を選んでください。' };
+  if (ids.length > MAX_IMPORT_ROWS) return { error: '1回に変更できるのは ' + MAX_IMPORT_ROWS + '人までです。' };
+  const rows = readRows_(SHEETS.students);
+  const targets = [];
+  for (let k = 0; k < ids.length; k++) {
+    const i = findStudentIndex_(rows, ids[k]);
+    if (i < 0) return { error: '見つからない学生がいます。画面を読み込み直してください。' };
+    const st = studentFromRow_(rows[i]);
+    if (!canHandle_(user, st)) return { error: '「' + st.name + '」さんは、あなたの担当クラスではないため変更できません。' };
+    targets.push({ index: i, student: st });
+  }
+  return { rows: rows, targets: targets };
+}
+
+/** 共通：学生シートのデータ部分をまとめて書き戻す */
+function writeStudentRows_(rows) {
+  if (!rows.length) return;
+  getSheet_(SHEETS.students.name).getRange(2, 1, rows.length, SHEETS.students.headers.length).setValues(rows);
+}
+
+/**
+ * クラスの移動（1人でも、まとめてでも。理由は必須）
+ * 卒業予定年度が自動の値のままの学生は、移動先のクラスに合わせて直す（手で直してあれば、そのまま）
+ */
+function moveStudents_(token, ids, toClass, reason) {
   const s = checkSession_(token);
   if (!s.ok) return s;
   reason = cleanText_(reason, MAX_REASON_LEN);
@@ -302,34 +399,44 @@ function moveStudent_(token, studentId, toClass, reason) {
   if (!reason) return { ok: false, message: '移動の理由を入力してください。' };
 
   return withLock_(function () {
-    const f = loadStudentFor_(s.user, studentId);
-    if (f.error) return { ok: false, message: f.error };
+    const t = loadTargets_(s.user, ids);
+    if (t.error) return { ok: false, message: t.error };
     const classes = classMap_();
     if (!classes[toClass]) return { ok: false, message: '移動先のクラスを選んでください。' };
-    if (toClass === f.student.classCode) return { ok: false, message: 'いまと同じクラスです。' };
+    const moving = t.targets.filter(function (x) { return x.student.classCode !== toClass; });
+    if (!moving.length) return { ok: false, message: '選んだ学生は、みな移動先と同じクラスです。' };
+
     const now = nowText_();
-    const sheet = getSheet_(SHEETS.students.name);
-    sheet.getRange(f.index + 2, ST.cls + 1).setValue(toClass);
-    sheet.getRange(f.index + 2, ST.updated + 1).setValue(now);
     const nameOf = function (code) { const c = classes[code]; return c ? c.name + '（' + code + '）' : code; };
-    addStudentLog_(f.student.id, 'クラス', nameOf(f.student.classCode), nameOf(toClass), reason, s.user.teacherId);
-    f.row[ST.cls] = toClass; f.row[ST.updated] = now;
-    // 卒業予定年度が自動の値のままなら、移動先のクラスに合わせて直す（手で直してあれば、そのまま）
-    let message = 'クラスを移動しました。';
-    const oldAuto = autoGradYear_(classes[f.student.classCode]);
     const newAuto = autoGradYear_(classes[toClass]);
-    if (newAuto && f.student.gradYear !== newAuto && (!f.student.gradYear || f.student.gradYear === oldAuto)) {
-      sheet.getRange(f.index + 2, ST.grad + 1).setValue(newAuto);
-      addStudentLog_(f.student.id, '卒業予定年度', f.student.gradYear || '（なし）', newAuto, 'クラス移動による自動更新', s.user.teacherId);
-      f.row[ST.grad] = newAuto;
-      message += '卒業予定年度を ' + newAuto + '年度に直しました。';
-    }
-    return { ok: true, item: studentFromRow_(f.row), message: message };
+    const logs = [];
+    let yearFixed = 0;
+    moving.forEach(function (x) {
+      const r = t.rows[x.index];
+      const st = x.student;
+      r[ST.cls] = toClass;
+      r[ST.updated] = now;
+      logs.push([st.id, 'クラス', nameOf(st.classCode), nameOf(toClass), reason, s.user.teacherId]);
+      const oldAuto = autoGradYear_(classes[st.classCode]);
+      if (newAuto && st.gradYear !== newAuto && (!st.gradYear || st.gradYear === oldAuto)) {
+        r[ST.grad] = newAuto;
+        logs.push([st.id, '卒業予定年度', st.gradYear || '（なし）', newAuto, 'クラス移動による自動更新', s.user.teacherId]);
+        yearFixed++;
+      }
+    });
+    writeStudentRows_(t.rows);
+    appendStudentLogs_(logs);
+    const items = moving.map(function (x) { return studentFromRow_(t.rows[x.index]); });
+    let message = moving.length === 1 ? 'クラスを移動しました。' : moving.length + '人のクラスを移動しました。';
+    if (yearFixed) message += moving.length === 1 ? '卒業予定年度を ' + newAuto + '年度に直しました。' : '卒業予定年度を ' + yearFixed + '人分、自動で直しました。';
+    const skipped = t.targets.length - moving.length;
+    if (skipped) message += '（すでに移動先のクラスだった ' + skipped + '人は、そのままです）';
+    return { ok: true, items: items, item: items[0], message: message };
   });
 }
 
-/** 在籍状態の変更（理由は必須） */
-function setEnrollStatus_(token, studentId, status, reason) {
+/** 在籍状態の変更（1人でも、まとめてでも。理由は必須） */
+function setEnrollStatuses_(token, ids, status, reason) {
   const s = checkSession_(token);
   if (!s.ok) return s;
   reason = cleanText_(reason, MAX_REASON_LEN);
@@ -338,23 +445,38 @@ function setEnrollStatus_(token, studentId, status, reason) {
   if (!reason) return { ok: false, message: '変更の理由を入力してください。' };
 
   return withLock_(function () {
-    const f = loadStudentFor_(s.user, studentId);
-    if (f.error) return { ok: false, message: f.error };
-    if (status === f.student.enroll) return { ok: false, message: 'いまと同じ在籍状態です。' };
+    const t = loadTargets_(s.user, ids);
+    if (t.error) return { ok: false, message: t.error };
+    const changing = t.targets.filter(function (x) { return x.student.enroll !== status; });
+    if (!changing.length) return { ok: false, message: t.targets.length === 1 ? 'いまと同じ在籍状態です。' : '選んだ学生は、みな「' + status + '」です。' };
     const now = nowText_();
-    const sheet = getSheet_(SHEETS.students.name);
-    sheet.getRange(f.index + 2, ST.enroll + 1).setValue(status);
-    sheet.getRange(f.index + 2, ST.updated + 1).setValue(now);
-    addStudentLog_(f.student.id, '在籍状態', f.student.enroll, status, reason, s.user.teacherId);
-    f.row[ST.enroll] = status; f.row[ST.updated] = now;
-    return { ok: true, item: studentFromRow_(f.row), message: '在籍状態を「' + status + '」にしました。' };
+    const logs = [];
+    changing.forEach(function (x) {
+      const r = t.rows[x.index];
+      r[ST.enroll] = status;
+      r[ST.updated] = now;
+      logs.push([x.student.id, '在籍状態', x.student.enroll, status, reason, s.user.teacherId]);
+    });
+    writeStudentRows_(t.rows);
+    appendStudentLogs_(logs);
+    const items = changing.map(function (x) { return studentFromRow_(t.rows[x.index]); });
+    let message = (changing.length === 1 ? '' : changing.length + '人の') + '在籍状態を「' + status + '」にしました。';
+    const skipped = t.targets.length - changing.length;
+    if (skipped) message += '（すでに「' + status + '」だった ' + skipped + '人は、そのままです）';
+    return { ok: true, items: items, item: items[0], message: message };
   });
 }
 
-/** 取得資格とメモの変更 */
-function updateStudentNotes_(token, studentId, quals, memo) {
+/* 1人用（前からある呼び方） */
+function moveStudent_(token, studentId, toClass, reason) { return moveStudents_(token, [studentId], toClass, reason); }
+function setEnrollStatus_(token, studentId, status, reason) { return setEnrollStatuses_(token, [studentId], status, reason); }
+
+/** 希望進路・取得資格・メモの変更（担当の教員もできる） */
+function updateStudentNotes_(token, studentId, quals, memo, course) {
   const s = checkSession_(token);
   if (!s.ok) return s;
+  course = String(course || '').trim();
+  if (course && COURSES.indexOf(course) < 0) return { ok: false, message: '希望進路を選んでください。' };
   const known = readRows_(SHEETS.qualifications).map(function (r) { return String(r[0]).trim(); });
   const list = (Array.isArray(quals) ? quals : []).map(function (q) { return String(q).trim(); }).filter(function (q, i, a) { return q && a.indexOf(q) === i; });
   if (list.some(function (q) { return known.indexOf(q) < 0; })) return { ok: false, message: '見つからない資格があります。画面を読み込み直してください。' };
@@ -364,10 +486,68 @@ function updateStudentNotes_(token, studentId, quals, memo) {
     const f = loadStudentFor_(s.user, studentId);
     if (f.error) return { ok: false, message: f.error };
     const now = nowText_();
-    const sheet = getSheet_(SHEETS.students.name);
-    sheet.getRange(f.index + 2, ST.quals + 1, 1, 2).setValues([[list.join(','), memo]]);
-    sheet.getRange(f.index + 2, ST.updated + 1).setValue(now);
-    f.row[ST.quals] = list.join(','); f.row[ST.memo] = memo; f.row[ST.updated] = now;
-    return { ok: true, item: studentFromRow_(f.row), message: '取得資格とメモを保存しました。' };
+    const r = f.row;
+    if (course && course !== f.student.course) {
+      r[ST.course] = course;
+      addStudentLog_(f.student.id, '希望進路', f.student.course, course, '希望進路の変更', s.user.teacherId);
+    }
+    r[ST.quals] = list.join(','); r[ST.memo] = memo; r[ST.updated] = now;
+    getSheet_(SHEETS.students.name).getRange(f.index + 2, 1, 1, r.length).setValues([r]);
+    return { ok: true, item: studentFromRow_(r), message: '希望進路・取得資格・メモを保存しました。' };
   });
+}
+
+/* =========================================================
+ * 卒業生のデータの削除（毎日の自動処理）
+ * ========================================================= */
+
+/**
+ * 卒業から3年たった学生のデータを削除する（在籍状態が「卒業」の学生だけ）
+ * 卒業予定年度が 2026 の学生は、2027年3月に卒業 → 2030年4月（2030年度）から削除の対象
+ * いっしょに、その学生の変更履歴・応募・指導記録も削除する
+ * 戻り値：削除した人数
+ */
+function purgeOldGraduates_() {
+  const fy = currentFiscalYear_();
+  return withLock_(function () {
+    const sheet = getSheet_(SHEETS.students.name);
+    const rows = readRows_(SHEETS.students);
+    const ids = [];
+    const keep = rows.filter(function (r) {
+      const y = Number(String(r[ST.grad]).trim());
+      const old = String(r[ST.enroll]).trim() === '卒業' && y && fy >= y + 1 + KEEP_YEARS_AFTER_GRADUATION;
+      if (old) ids.push(String(r[ST.id]).trim());
+      return !old;
+    });
+    if (!ids.length) return 0;
+    // 学生シートを書き直す（残す学生だけ）
+    if (rows.length) sheet.getRange(2, 1, rows.length, SHEETS.students.headers.length).clearContent();
+    if (keep.length) sheet.getRange(2, 1, keep.length, SHEETS.students.headers.length).setValues(keep);
+    // 学生IDが2列目にあるシートから、その学生の行を消す
+    [SHEETS.studentLogs, SHEETS.entries, SHEETS.records].forEach(function (def) {
+      const all = readRows_(def);
+      const rest = all.filter(function (r) { return ids.indexOf(String(r[1]).trim()) < 0; });
+      if (rest.length === all.length) return;
+      const sh = getSheet_(def.name);
+      sh.getRange(2, 1, all.length, def.headers.length).clearContent();
+      if (rest.length) sh.getRange(2, 1, rest.length, def.headers.length).setValues(rest);
+    });
+    return ids.length;
+  });
+}
+
+/** 毎日の自動処理（トリガーから呼ばれる） */
+function dailyJobs() {
+  const n = purgeOldGraduates_();
+  Logger.log('卒業から' + KEEP_YEARS_AFTER_GRADUATION + '年たった学生のデータを削除しました：' + n + '人');
+}
+
+/** 【1回だけ実行】毎日の自動処理（午前3時ごろ）を登録する。すでにあれば作り直す */
+function setupDailyJobs() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'dailyJobs') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('dailyJobs').timeBased().everyDays(1).atHour(3).create();
+  Logger.log('毎日の自動処理（dailyJobs・午前3時ごろ）を登録しました');
+  dailyJobs();
 }

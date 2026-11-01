@@ -40,10 +40,18 @@ const SHEETS = {
   },
   students: {
     name: '学生',
-    headers: ['学生ID', '学籍番号', '名前', 'ふりがな', 'クラスコード', '卒業予定年度', '在籍状態', '状況', '取得資格', 'メモ', '登録日時', '更新日時'],
-    widths: [90, 100, 140, 160, 100, 100, 80, 90, 200, 240, 140, 140],
-    textCols: 12,
-    lists: { 7: ['在籍', '休学', '退学', '除籍', '卒業'], 8: ['未着手', '選考中', '内定', '選考終了'] }
+    headers: ['学生ID', '学籍番号', '名前', 'ふりがな', '生年月日', '性別', '国籍', '電話番号', 'メールアドレス',
+              'クラスコード', '卒業予定年度', '在籍状態', '希望進路', '状況', '取得資格', 'メモ', '登録日時', '更新日時'],
+    widths: [90, 100, 140, 160, 100, 70, 100, 120, 200, 100, 100, 80, 90, 90, 200, 240, 140, 140],
+    textCols: 18,
+    lists: {
+      6: ['男性', '女性', 'その他', '回答しない'],
+      12: ['在籍', '休学', '退学', '除籍', '卒業'],
+      13: ['就職希望', '進学希望', '帰国希望', '未定'],
+      14: ['未着手', '選考中', '内定', '選考終了']
+    },
+    // 列を足したときに、登録済みの学生に入れる値
+    defaults: { '在籍状態': '在籍', '希望進路': '未定' }
   },
   studentLogs: {
     name: '学生の変更履歴',
@@ -179,20 +187,26 @@ function upgradeMasters() {
 }
 
 /**
- * 【1回だけ実行】学生シートに「在籍状態」の列を足し、「学生の変更履歴」シートを作る（L-8）
- * 卒業予定年度の右（G列）に列を入れ、登録済みの学生は「在籍」にする。もう直してあるときは何もしない
+ * 【シートの形を新しくするときに実行】学生シートに足りない列を足し、「学生の変更履歴」シートを作る（L-8）
+ * - 見出しの順番どおりに、足りない列をその場所に入れる（入力済みのデータは右にずれるだけで消えない）
+ * - 足した列には、登録済みの学生に初めの値を入れる（在籍状態＝在籍、希望進路＝未定）
+ * - もう直してあるときは何もしないので、2回実行しても大丈夫
  */
 function upgradeStudents() {
-  const sheet = getSheet_(SHEETS.students.name);
-  if (String(sheet.getRange(1, 7).getValue()).trim() === '在籍状態') {
-    Logger.log('学生：在籍状態の列はすでにあります');
-  } else {
-    sheet.insertColumnAfter(6);
-    sheet.getRange(1, 7).setValue('在籍状態');
+  const def = SHEETS.students;
+  const sheet = getSheet_(def.name);
+  def.headers.forEach(function (h, k) {
+    const lastCol = Math.max(sheet.getLastColumn(), 1);
+    const now = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (x) { return String(x).trim(); });
+    if (now[k] === h) return;
+    if (now.indexOf(h) >= 0) throw new Error('学生シートの列「' + h + '」の場所が、思っていた場所とちがいます。列を手で動かしていないか確認してください。');
+    if (k === 0) sheet.insertColumnBefore(1); else sheet.insertColumnAfter(k);
+    sheet.getRange(1, k + 1).setValue(h);
     const last = sheet.getLastRow();
-    if (last >= 2) sheet.getRange(2, 7, last - 1, 1).setValue('在籍');
-    Logger.log('学生：G列に在籍状態の列を足しました（登録済みの学生 ' + Math.max(0, last - 1) + '人は「在籍」にしました）');
-  }
+    const v = (def.defaults || {})[h];
+    if (v && last >= 2) sheet.getRange(2, k + 1, last - 1, 1).setValue(v);
+    Logger.log('学生：' + (k + 1) + '列目に「' + h + '」の列を足しました' + (v && last >= 2 ? '（登録済みの学生 ' + (last - 1) + '人は「' + v + '」）' : ''));
+  });
   setupSheets();
   testSheets();
 }

@@ -75,8 +75,12 @@ function doPost(e) {
         return json_(moveStudent_(req.token, req.studentId, req.toClass, req.reason));
       case 'setEnrollStatus':
         return json_(setEnrollStatus_(req.token, req.studentId, req.status, req.reason));
+      case 'moveStudents':
+        return json_(moveStudents_(req.token, req.studentIds, req.toClass, req.reason));
+      case 'setEnrollStatuses':
+        return json_(setEnrollStatuses_(req.token, req.studentIds, req.status, req.reason));
       case 'updateStudentNotes':
-        return json_(updateStudentNotes_(req.token, req.studentId, req.quals, req.memo));
+        return json_(updateStudentNotes_(req.token, req.studentId, req.quals, req.memo, req.course));
       default:
         return json_({ ok: false, message: '不明な操作です。' });
     }
