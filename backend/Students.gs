@@ -60,6 +60,37 @@ function classMap_() {
   return map;
 }
 
+/**
+ * クラスの学年・学科の修業年限が変わったとき、そのクラスの学生の卒業予定年度を自動で直す
+ * - 直すのは、いまの卒業予定年度が「変更前のクラスで自動計算した年度」と同じ学生だけ
+ *   （留年などで学校管理者が手で直した学生は、そのままにする）
+ * - 直したら変更履歴に残す。戻り値は画面に出す一言（直した人がいなければ空）
+ * ※ withLock_ の中から呼ぶこと
+ */
+function recalcGradYears_(classCodes, before, after, teacherId, reason) {
+  if (!classCodes.length) return '';
+  const sheet = getSheet_(SHEETS.students.name);
+  const rows = readRows_(SHEETS.students);
+  const now = nowText_();
+  let changed = 0;
+  let kept = 0;
+  rows.forEach(function (r, i) {
+    const code = String(r[ST.cls]).trim();
+    if (classCodes.indexOf(code) < 0) return;
+    const current = String(r[ST.grad]).trim();
+    const oldAuto = autoGradYear_(before[code]);
+    const newAuto = autoGradYear_(after[code]);
+    if (!newAuto || current === newAuto) return;
+    if (current && current !== oldAuto) { kept++; return; }
+    sheet.getRange(i + 2, ST.grad + 1).setValue(newAuto);
+    sheet.getRange(i + 2, ST.updated + 1).setValue(now);
+    addStudentLog_(String(r[ST.id]).trim(), '卒業予定年度', current || '（なし）', newAuto, reason + 'による自動更新', teacherId);
+    changed++;
+  });
+  if (!changed && !kept) return '';
+  return '学生の卒業予定年度を ' + changed + '人分、自動で直しました。' + (kept ? '（手で直してある ' + kept + '人は、そのままにしました）' : '');
+}
+
 /** その学生を、この人が扱えるか（学校管理者はすべて、教員は担当クラスの学生だけ） */
 function canHandle_(user, student) {
   return user.role === 'admin' || (user.classes || []).indexOf(student.classCode) >= 0;
@@ -283,7 +314,17 @@ function moveStudent_(token, studentId, toClass, reason) {
     const nameOf = function (code) { const c = classes[code]; return c ? c.name + '（' + code + '）' : code; };
     addStudentLog_(f.student.id, 'クラス', nameOf(f.student.classCode), nameOf(toClass), reason, s.user.teacherId);
     f.row[ST.cls] = toClass; f.row[ST.updated] = now;
-    return { ok: true, item: studentFromRow_(f.row), message: 'クラスを移動しました。' };
+    // 卒業予定年度が自動の値のままなら、移動先のクラスに合わせて直す（手で直してあれば、そのまま）
+    let message = 'クラスを移動しました。';
+    const oldAuto = autoGradYear_(classes[f.student.classCode]);
+    const newAuto = autoGradYear_(classes[toClass]);
+    if (newAuto && f.student.gradYear !== newAuto && (!f.student.gradYear || f.student.gradYear === oldAuto)) {
+      sheet.getRange(f.index + 2, ST.grad + 1).setValue(newAuto);
+      addStudentLog_(f.student.id, '卒業予定年度', f.student.gradYear || '（なし）', newAuto, 'クラス移動による自動更新', s.user.teacherId);
+      f.row[ST.grad] = newAuto;
+      message += '卒業予定年度を ' + newAuto + '年度に直しました。';
+    }
+    return { ok: true, item: studentFromRow_(f.row), message: message };
   });
 }
 

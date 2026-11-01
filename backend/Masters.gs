@@ -130,8 +130,14 @@ function saveDepartment_(token, item) {
         return String(r[3]).trim() === id && Number(r[4]) > years;
       }).length;
       if (over) return { ok: false, message: 'この学科には ' + (years + 1) + '年以上のクラスが ' + over + ' つあるため、修業年限を ' + years + '年にできません。先にクラスを変更・削除してください。' };
+      const before = classMap_(); // 変更前のクラスの学年・修業年限
       sheet.getRange(i + 2, 2, 1, 3).setValues([[name, label, years]]);
-      return { ok: true, item: result, message: '学科を変更しました。' };
+      let message = '学科を変更しました。';
+      if (Number(rows[i][3]) !== years) {
+        const codes = Object.keys(before).filter(function (c) { return before[c].deptId === id; });
+        message += recalcGradYears_(codes, before, classMap_(), s.user.teacherId, '学科の修業年限の変更（' + rows[i][3] + '年制 → ' + years + '年制）');
+      }
+      return { ok: true, item: result, message: message };
     }
     result.id = nextId_(rows, 'D');
     sheet.appendRow([result.id, name, label, years, nowText_()]);
@@ -189,8 +195,14 @@ function saveClass_(token, item) {
     if (code) {
       const i = indexOfId_(rows, code);
       if (i < 0) return { ok: false, message: 'このクラスは見つかりません。画面を読み込み直してください。' };
+      const before = classMap_(); // 変更前の学年・修業年限
       sheet.getRange(i + 2, 2, 1, 4).setValues([[name, label, deptId, grade]]);
-      return { ok: true, item: result, message: 'クラスを変更しました。' };
+      let message = 'クラスを変更しました。';
+      const old = before[code];
+      if (old && (old.grade !== grade || old.deptId !== deptId)) {
+        message += recalcGradYears_([code], before, classMap_(), s.user.teacherId, 'クラスの学年・学科の変更');
+      }
+      return { ok: true, item: result, message: message };
     }
     result.code = nextId_(rows, 'C');
     sheet.appendRow([result.code, name, label, deptId, grade, nowText_()]);

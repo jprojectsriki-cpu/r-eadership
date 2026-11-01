@@ -1,5 +1,6 @@
 /* R-eadership 「学生名簿」の画面
  * - 学校管理者はすべての学生、教員は担当クラスの学生だけが表示される（GASが選んで返す）
+ * - 上部に在籍状態ごとの人数（しぼりこみの条件に合わせて数える。押すとその在籍状態でしぼりこむ）
  * - しぼりこみ：学科・学年・クラス・在籍状態・卒業予定年度・名前などの検索
  * - 学生を押すと詳しい画面が開き、クラス移動・在籍状態の変更（理由は必須）・取得資格とメモ・変更履歴を扱える
  * - 学校管理者だけ：学生の登録、CSVでまとめて登録、基本情報の変更、削除
@@ -17,6 +18,7 @@
     var filtersOpen = false;
     var root = null;
     var listBox = null;
+    var summaryBox = null;
 
     /* ---------- 名前を引く ---------- */
     function cls(code) { return data.classes.find(function (c) { return c.code === code; }) || null; }
@@ -57,14 +59,15 @@
     /* =========================================================
      * 一覧
      * ========================================================= */
-    function filtered() {
+    // ignoreEnroll が true なら、在籍状態のしぼりこみだけを使わない（上部の人数の表示で使う）
+    function filtered(ignoreEnroll) {
         var q = filters.q.trim().toLowerCase();
         return data.students.filter(function (s) {
             var c = cls(s.classCode);
             if (filters.dept && (!c || c.deptId !== filters.dept)) return false;
             if (filters.grade && (!c || String(c.grade) !== filters.grade)) return false;
             if (filters.cls && s.classCode !== filters.cls) return false;
-            if (filters.enroll && s.enroll !== filters.enroll) return false;
+            if (!ignoreEnroll && filters.enroll && s.enroll !== filters.enroll) return false;
             if (filters.year && s.gradYear !== filters.year) return false;
             if (q && (s.name + ' ' + s.kana + ' ' + s.studentNo).toLowerCase().indexOf(q) < 0) return false;
             return true;
@@ -120,7 +123,24 @@
         return bar;
     }
 
+    /* 上部の人数（在籍状態ごと）。押すと、その在籍状態でしぼりこむ */
+    function drawSummary() {
+        var base = filtered(true);
+        var count = function (v) { return base.filter(function (s) { return !v || s.enroll === v; }).length; };
+        summaryBox.replaceChildren();
+        [''].concat(ENROLL).forEach(function (v, i) {
+            var on = filters.enroll === v;
+            var b = el('button', { type: 'button', class: 'stat' + (on ? ' is-active' : '') + (i ? ' stat-' + (i - 1) : ' stat-all'), 'aria-pressed': String(on) }, [
+                el('span', { class: 'stat-label', text: v || 'すべて' }),
+                el('span', { class: 'stat-num' }, [document.createTextNode(String(count(v))), el('small', { text: '人' })])
+            ]);
+            b.addEventListener('click', function () { filters.enroll = v; draw(); });
+            summaryBox.append(b);
+        });
+    }
+
     function drawList() {
+        drawSummary();
         var list = filtered();
         listBox.replaceChildren();
         listBox.append(el('p', { class: 'list-sub', text: list.length + '人' + (list.length !== data.students.length ? '（全 ' + data.students.length + '人中）' : '') }));
@@ -156,7 +176,9 @@
             el('button', { type: 'button', class: 'btn btn-primary', onclick: function () { openBasicForm(null); } }, [RUI.icon('i-plus'), el('span', { text: '学生を登録' })])
         ]) : null;
         listBox = el('div', { class: 'list-box' });
+        summaryBox = el('div', { class: 'stat-row', role: 'group', 'aria-label': '在籍状態ごとの人数（押すとしぼりこみます）' });
         root.append(
+            summaryBox,
             el('section', { class: 'panel panel-flush' }, [
                 el('div', { class: 'list-head' }, [el('p', { class: 'list-count', text: admin ? '学生名簿（すべてのクラス）' : '学生名簿（担当クラス）' }), actions]),
                 toolbar(),
