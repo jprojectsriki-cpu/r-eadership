@@ -5,7 +5,8 @@
  * - 表示は「基本情報」「取得資格（資格ごとの ✓ の表）」のタブで切り替える。30人ずつのページ送り
  * - チェックで選んだ学生を、まとめてクラス移動・在籍状態の変更ができる（進級・卒業のときなど。理由は必須）
  * - 学生を押すと詳しい画面が開き、クラス移動・在籍状態の変更（理由は必須）・取得資格とメモ・変更履歴を扱える
- * - 学年はクラスで決まる（学年を変えるときは、その学年のクラスへ移動する）
+ * - 学科とクラスは、学生ごとにそれぞれ選ぶ。学年はクラスで決まる（学年を変えるときは、その学年のクラスへ移動する）
+ * - 卒業予定年度は、今年度＋学校の修業年限−クラスの学年（自動。留年などのときは学校管理者が直す）
  * - 学校管理者だけ：学生の登録、CSVでまとめて登録、基本情報（生年月日・性別・国籍・電話・メールをふくむ）の変更、削除
  * - 希望進路（就職希望・進学希望・帰国希望・未定）・取得資格・メモは、担当の教員も変えられる
  * - クラス・資格は「ラベル」で表示する（ラベルがなければ名前）
@@ -15,13 +16,13 @@
 
     var el = function () { return RUI.el.apply(null, arguments); };
     var ENROLL = ['在籍', '休学', '退学', '除籍', '卒業'];
-    var CSV_HEADERS = ['学籍番号', '名前', 'ふりがな', '生年月日', '性別', '国籍', '電話番号', 'メールアドレス', '希望進路', '進学予定先', 'クラス', '卒業予定年度'];
-    var CSV_KEYS = ['studentNo', 'name', 'kana', 'birth', 'gender', 'nation', 'tel', 'mail', 'course', 'school', 'cls', 'gradYear'];
+    var CSV_HEADERS = ['学籍番号', '名前', 'ふりがな', '生年月日', '性別', '国籍', '電話番号', 'メールアドレス', '希望進路', '進学予定先', '学科', 'クラス', '卒業予定年度'];
+    var CSV_KEYS = ['studentNo', 'name', 'kana', 'birth', 'gender', 'nation', 'tel', 'mail', 'course', 'school', 'dept', 'cls', 'gradYear'];
     var CSV_REQUIRED = ['学籍番号', '名前', 'クラス'];
     var GENDERS = ['男性', '女性', 'その他', '回答しない'];
     var COURSES = ['就職希望', '進学希望', '帰国希望', '未定'];
     var KEEP_YEARS = 3; // 卒業生のデータを残す年数（GASの KEEP_YEARS_AFTER_GRADUATION と同じ）
-    var data = { students: [], departments: [], classes: [], qualifications: [], fiscalYear: 0 };
+    var data = { students: [], schoolYears: 2, departments: [], classes: [], qualifications: [], fiscalYear: 0 };
     var filters = { dept: '', grade: '', cls: '', enroll: '在籍', course: '', year: '', q: '' };
     var admin = false;
     var filtersOpen = false;
@@ -40,21 +41,23 @@
     function qual(id) { return data.qualifications.find(function (q) { return q.id === id; }) || null; }
     function short(x, fallback) { return x ? (x.label || x.name) : (fallback || '（不明）'); }
     function classText(code) { var c = cls(code); return c ? short(c) : code + '（削除されたクラス）'; }
+    function deptText(id) { if (!id) return '—'; var d = dept(id); return d ? short(d) : id + '（削除された学科）'; }
     function autoYear(classCode) {
-        var c = cls(classCode); var d = c && dept(c.deptId);
-        return c && d ? String(data.fiscalYear + d.years - c.grade) : '';
+        var c = cls(classCode);
+        return c ? String(data.fiscalYear + data.schoolYears - c.grade) : '';
+    }
+    function deptOptions(first) {
+        return [{ value: '', label: first || '選んでください' }].concat(data.departments.map(function (d) { return { value: d.id, label: d.name }; }));
     }
     function replaceItem(item) {
         var i = data.students.findIndex(function (s) { return s.id === item.id; });
         if (i >= 0) data.students[i] = item; else data.students.push(item);
     }
-    // クラスの選択肢（学科ごとにまとめる）
+    // クラスの選択肢（学年ごとにまとめる）
     function classOptions(first) {
         var opts = [{ value: '', label: first || '選んでください' }];
-        data.departments.forEach(function (d) {
-            data.classes.filter(function (c) { return c.deptId === d.id; }).forEach(function (c) {
-                opts.push({ value: c.code, label: c.name + '（' + c.grade + '年）', group: d.name });
-            });
+        data.classes.forEach(function (c) {
+            opts.push({ value: c.code, label: c.name, group: c.grade + '年' });
         });
         return opts;
     }
@@ -79,7 +82,7 @@
         var q = filters.q.trim().toLowerCase();
         return data.students.filter(function (s) {
             var c = cls(s.classCode);
-            if (filters.dept && (!c || c.deptId !== filters.dept)) return false;
+            if (filters.dept && s.deptId !== filters.dept) return false;
             if (filters.grade && (!c || String(c.grade) !== filters.grade)) return false;
             if (filters.cls && s.classCode !== filters.cls) return false;
             if (!ignoreEnroll && filters.enroll && s.enroll !== filters.enroll) return false;
@@ -99,19 +102,16 @@
             RUI.setOptions(sel, options, filters[key]);
             sel.addEventListener('change', function () {
                 filters[key] = sel.value;
-                if (key === 'dept') { filters.grade = ''; filters.cls = ''; }
                 if (key === 'grade') filters.cls = '';
                 page = 1;
                 draw();
             });
             return el('label', { class: 'filter filter-more' }, [el('span', { text: label }), sel]);
         };
-        var maxYears = 0;
-        data.departments.forEach(function (d) { if (!filters.dept || d.id === filters.dept) maxYears = Math.max(maxYears, d.years); });
         var grades = [{ value: '', label: 'すべて' }];
-        for (var g = 1; g <= maxYears; g++) grades.push({ value: String(g), label: g + '年' });
+        for (var g = 1; g <= data.schoolYears; g++) grades.push({ value: String(g), label: g + '年' });
         var classes = [{ value: '', label: 'すべて' }].concat(data.classes.filter(function (c) {
-            return (!filters.dept || c.deptId === filters.dept) && (!filters.grade || String(c.grade) === filters.grade);
+            return !filters.grade || String(c.grade) === filters.grade;
         }).map(function (c) { return { value: c.code, label: short(c) }; }));
         var years = data.students.map(function (s) { return s.gradYear; }).filter(function (y, i, a) { return y && a.indexOf(y) === i; }).sort();
         var search = el('input', { type: 'search', placeholder: '名前・ふりがな・学籍番号', 'aria-label': '検索', value: filters.q });
@@ -260,7 +260,7 @@
             var headCb = el('input', { type: 'checkbox', 'aria-label': 'このページの学生をすべて選ぶ' });
             headCb.checked = pageAll;
             headCb.addEventListener('change', function () { list.forEach(function (s) { if (headCb.checked) selected.add(s.id); else selected.delete(s.id); }); drawList(); });
-            headers = [el('th', { class: 'col-check' }, [headCb])].concat(['学籍番号', '名前', 'クラス', '学年', '卒業予定', '在籍', '希望進路', '就活', '資格'].map(function (h) { return el('th', { scope: 'col', text: h }); }));
+            headers = [el('th', { class: 'col-check' }, [headCb])].concat(['学籍番号', '名前', '学科', 'クラス', '学年', '卒業予定', '在籍', '希望進路', '就活', '資格'].map(function (h) { return el('th', { scope: 'col', text: h }); }));
             tableClass = 'data-table student-table compact';
             rowOf = function (s) {
                 var c = cls(s.classCode);
@@ -268,6 +268,7 @@
                     checkCell(s),
                     el('td', { class: 'cell-mono', 'data-label': '学籍番号', text: s.studentNo }),
                     nameCell(s),
+                    el('td', { 'data-label': '学科', text: deptText(s.deptId) }),
                     el('td', { 'data-label': 'クラス' }, [el('span', { class: 'label-tag', text: classText(s.classCode) })]),
                     el('td', { 'data-label': '学年', text: c ? c.grade + '年' : '—' }),
                     el('td', { 'data-label': '卒業予定', text: s.gradYear ? s.gradYear + '年度' : '—' }),
@@ -348,7 +349,6 @@
         var s = data.students.find(function (x) { return x.id === id; });
         if (!s) return;
         var c = cls(s.classCode);
-        var d = c && dept(c.deptId);
         var logBox = el('div', { class: 'log-box' });
         var entryBox = el('div', {});
         var recordBox = el('div', {});
@@ -357,7 +357,8 @@
             el('p', { class: 'detail-kana', text: s.kana || '' }),
             el('dl', { class: 'detail-list' }, [
                 el('dt', { text: '学籍番号' }), el('dd', { text: s.studentNo }),
-                el('dt', { text: 'クラス' }), el('dd', { text: c ? c.name + '（' + (d ? d.name : '') + '・' + c.grade + '年）' : classText(s.classCode) }),
+                el('dt', { text: '学科' }), el('dd', { text: s.deptId ? (dept(s.deptId) ? dept(s.deptId).name : deptText(s.deptId)) : '—' }),
+                el('dt', { text: 'クラス' }), el('dd', { text: c ? c.name + '（' + c.grade + '年）' : classText(s.classCode) }),
                 el('dt', { text: '卒業予定' }), el('dd', { text: s.gradYear ? s.gradYear + '年度' : '—' }),
                 el('dt', { text: '生年月日' }), el('dd', { text: s.birth ? s.birth + '（' + age(s.birth) + '歳）' : '—' }),
                 el('dt', { text: '性別' }), el('dd', { text: s.gender || '—' }),
@@ -537,7 +538,8 @@
             { name: 'gender', label: '性別', value: s.gender, type: 'select', options: [{ value: '', label: '（入れない）' }].concat(GENDERS.map(function (v) { return { value: v, label: v }; })) },
             { name: 'nation', label: '国籍', value: s.nation, maxlength: 30, placeholder: '例：日本／ベトナム' },
             { name: 'tel', label: '電話番号', value: s.tel, type: 'tel', maxlength: 20, placeholder: '例：090-1234-5678', autocomplete: 'off' },
-            { name: 'mail', label: 'メールアドレス', value: s.mail, type: 'email', maxlength: 100, placeholder: '例：taro@example.com', autocomplete: 'off' }
+            { name: 'mail', label: 'メールアドレス', value: s.mail, type: 'email', maxlength: 100, placeholder: '例：taro@example.com', autocomplete: 'off' },
+            { name: 'deptId', label: '学科', value: s.deptId, type: 'select', required: data.departments.length > 0, options: deptOptions(data.departments.length ? '選んでください' : '（学科がまだ登録されていません）') }
         ];
         if (isNew) {
             fields.push({ name: 'classCode', label: 'クラス', type: 'select', required: true, options: classOptions(), hint: '学年は、選んだクラスの学年になります。' });
@@ -547,7 +549,7 @@
             fields.push({ name: 'clsView', label: 'クラス・学年', type: 'static', value: classText(s.classCode) + (c0 ? '（' + c0.grade + '年）' : '') + '　※ クラス・学年は「クラス移動」で変えます' });
         }
         fields.push({ name: 'gradYear', label: '卒業予定年度', value: s.gradYear, maxlength: 6, placeholder: '例：2027',
-            hint: isNew ? 'クラスを選ぶと、学年と修業年限から自動で入ります。留年などのときは直してください。' : '留年などのときに直します。変更履歴に残ります。' });
+            hint: isNew ? 'クラスを選ぶと、学校の修業年限（' + data.schoolYears + '年制）とクラスの学年から自動で入ります。留年などのときは直してください。' : '留年などのときに直します。変更履歴に残ります。' });
         var lastAuto = '';
         RUI.form({
             title: isNew ? '学生を登録' : s.name + 'さんの基本情報の変更',
@@ -556,14 +558,13 @@
             onChange: isNew ? function (form, name) {
                 if (name !== 'classCode') return;
                 var c = cls(form.elements.classCode.value);
-                var d = c && dept(c.deptId);
                 var gv = form.querySelector('.static-value');
-                if (gv) gv.textContent = c ? c.grade + '年（' + (d ? d.name + '・' + d.years + '年制' : '') + '）' : 'クラスを選ぶと表示されます';
+                if (gv) gv.textContent = c ? c.grade + '年' : 'クラスを選ぶと表示されます';
                 var y = form.elements.gradYear;
                 if (!y.value || y.value === lastAuto) { lastAuto = autoYear(form.elements.classCode.value); y.value = lastAuto; }
             } : null,
             onSubmit: function (v) {
-                var item = { id: s.id, studentNo: v.studentNo, name: v.name, kana: v.kana, birth: v.birth, gender: v.gender, nation: v.nation, tel: v.tel, mail: v.mail, classCode: v.classCode, gradYear: v.gradYear };
+                var item = { id: s.id, studentNo: v.studentNo, name: v.name, kana: v.kana, birth: v.birth, gender: v.gender, nation: v.nation, tel: v.tel, mail: v.mail, deptId: v.deptId, classCode: v.classCode, gradYear: v.gradYear };
                 return RApi.post('saveStudent', { item: item }, isNew ? '登録しています' : '保存しています').then(function (res) { return afterSave(res, isNew ? null : s.id); });
             }
         });
@@ -596,8 +597,8 @@
             if (!yes) return;
             var headers = ['学籍番号', '名前', 'ふりがな', '生年月日', '性別', '国籍', '電話番号', 'メールアドレス', '学科', '学年', 'クラス', '卒業予定年度', '在籍状態', '希望進路', '進学予定先', '就活の状況', '取得資格', 'メモ'];
             var rows = list.map(function (s) {
-                var c = cls(s.classCode), d = c && dept(c.deptId);
-                return [s.studentNo, s.name, s.kana, s.birth, s.gender, s.nation, s.tel, s.mail, d ? d.name : '', c ? c.grade : '', c ? c.name : s.classCode,
+                var c = cls(s.classCode), d = dept(s.deptId);
+                return [s.studentNo, s.name, s.kana, s.birth, s.gender, s.nation, s.tel, s.mail, d ? d.name : s.deptId, c ? c.grade : '', c ? c.name : s.classCode,
                     s.gradYear, s.enroll, s.course, s.school, s.job, s.quals.map(function (q) { return short(qual(q), q); }).join('・'), s.memo];
             });
             RUI.downloadCsv('readership_students_' + RUI.todayStamp() + '.csv', headers, rows);
@@ -611,7 +612,8 @@
     function csvEscape(v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
     function downloadTemplate() {
         var sample = data.classes[0];
-        var lines = [CSV_HEADERS.join(','), ['2026001', '比嘉 太郎', 'ひが たろう', '2006-04-01', '男性', '日本', '090-1234-5678', 'taro@example.com', '就職希望', '', sample ? short(sample) : 'クラスのラベル', ''].map(csvEscape).join(',')];
+        var sampleDept = data.departments[0];
+        var lines = [CSV_HEADERS.join(','), ['2026001', '比嘉 太郎', 'ひが たろう', '2006-04-01', '男性', '日本', '090-1234-5678', 'taro@example.com', '就職希望', '', sampleDept ? short(sampleDept) : '', sample ? short(sample) : 'クラスのラベル', ''].map(csvEscape).join(',')];
         var blob = new Blob(['﻿' + lines.join('\r\n') + '\r\n'], { type: 'text/csv' });
         var a = el('a', { href: URL.createObjectURL(blob), download: 'readership_students_template.csv' });
         document.body.append(a); a.click(); a.remove();
@@ -652,7 +654,7 @@
         var body = el('div', { class: 'modal-body' }, [
             el('ol', { class: 'import-steps' }, [
                 el('li', {}, [document.createTextNode('ひな形をダウンロードして、Excelなどで学生を入力します。'), el('button', { type: 'button', class: 'btn btn-sm', onclick: downloadTemplate }, [RUI.icon('i-download'), el('span', { text: 'ひな形（CSV）' })])]),
-                el('li', { text: '必ず入れるのは「学籍番号」「名前」「クラス」です。「クラス」には、クラスのラベル・クラス名・クラスコードのどれかを入れます。ほかの列は空でもかまいません（卒業予定年度は自動で入ります。希望進路は「就職希望・進学希望・帰国希望・未定」、進学予定先は進学希望のときの学校名、性別は「男性・女性・その他・回答しない」、生年月日は「2006-04-01」の形）。' }),
+                el('li', { text: '必ず入れるのは「学籍番号」「名前」「学科」「クラス」です（学科がまだ登録されていなければ、「学科」は空でかまいません）。「学科」には学科のラベル・学科名・学科IDのどれか、「クラス」にはクラスのラベル・クラス名・クラスコードのどれかを入れます。ほかの列は空でもかまいません（卒業予定年度は自動で入ります。希望進路は「就職希望・進学希望・帰国希望・未定」、進学予定先は進学希望のときの学校名、性別は「男性・女性・その他・回答しない」、生年月日は「2006-04-01」の形）。' }),
                 el('li', { text: 'CSV形式で保存したファイルを選びます。まず内容を確かめ、まちがいがなければ「登録する」を押します。' })
             ]),
             el('div', { class: 'form-field' }, [el('label', { for: 'csvFile', class: 'field-label', text: 'CSVファイル' }), fileInput]),
@@ -725,6 +727,7 @@
             if (!res[0] || !res[0].ok || !res[1] || !res[1].ok) { RUI.toast('読み込めませんでした。', 'error'); return; }
             data.students = res[0].students;
             data.fiscalYear = res[0].fiscalYear;
+            data.schoolYears = res[1].schoolYears || 2;
             data.departments = res[1].departments || [];
             data.classes = (res[1].classes || []).slice().sort(function (a, b) { return a.grade - b.grade || a.name.localeCompare(b.name, 'ja', { numeric: true }); });
             data.qualifications = res[1].qualifications || [];

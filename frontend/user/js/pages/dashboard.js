@@ -165,9 +165,8 @@
     /* ---------- 集計 ---------- */
     function targetStudents() {
         return data.students.filter(function (s) {
-            var c = cls(s.classCode);
             if (filters.year && s.gradYear !== filters.year) return false;
-            if (filters.dept && (!c || c.deptId !== filters.dept)) return false;
+            if (filters.dept && s.deptId !== filters.dept) return false;
             return true;
         });
     }
@@ -275,7 +274,7 @@
         ]));
 
         // クラスごとの就職決定率
-        var classRows = data.classes.filter(function (c) { return !filters.dept || c.deptId === filters.dept; }).map(function (c) {
+        var classRows = data.classes.map(function (c) {
             var wish = jobWish.filter(function (s) { return s.classCode === c.code; });
             if (!wish.length) return null;
             var d = wish.filter(function (s) { return s.job === '就職先決定'; }).length;

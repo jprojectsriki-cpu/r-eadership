@@ -1,7 +1,6 @@
 /* R-eadership 「学科・クラス・資格」の画面（学校管理者だけ）
- * - タブで「学科」「クラス」「資格」を切り替える
- * - 学科：修業年限（1〜4年制）を登録する。クラスの学年は、その範囲から選ぶ
- * - クラス：学科と学年をプルダウンで選ぶ
+ * - 上に「学校の修業年限（何年制か）」。クラスの学年は、1年からその年数までの中から選ぶ
+ * - タブで「学科」「クラス」「資格」を切り替える（学科とクラスは関係しない。学生ごとに、学科とクラスをそれぞれ選ぶ）
  * - 追加・変更は入力の画面で、削除は一覧の「削除」ボタンから（確認してから）
  * - ラベル：学生名簿などで表示する短い名前（空なら名前を表示）
  */
@@ -9,25 +8,17 @@
     'use strict';
 
     var el = function () { return RUI.el.apply(null, arguments); };
-    var data = { departments: [], classes: [], qualifications: [] };
+    var data = { schoolYears: 2, departments: [], classes: [], qualifications: [] };
     var tab = 'departments';
     var root = null;
     var MAX_YEARS = 4;
     var LABEL_HINT = '学生名簿などに表示する短い名前です。空のときは、名前をそのまま表示します。';
 
-    function deptById(id) { return data.departments.find(function (d) { return d.id === id; }) || null; }
-    function shortName(x) { return x ? (x.label || x.name) : ''; }
-    // すでにある学科でいちばん多い修業年限（学科がまだなければ空）。学科を追加するときの初めの値に使う
-    function commonYears() {
-        var count = {};
-        var best = '';
-        data.departments.forEach(function (d) {
-            count[d.years] = (count[d.years] || 0) + 1;
-            if (!best || count[d.years] > count[best]) best = d.years;
-        });
-        return best;
+    function gradeOptions(first) {
+        var opts = [{ value: '', label: first }];
+        for (var g = 1; g <= data.schoolYears; g++) opts.push({ value: g, label: g + '年' });
+        return opts;
     }
-    function countClasses(deptId) { return data.classes.filter(function (c) { return c.deptId === deptId; }).length; }
 
     var KINDS = {
         departments: {
@@ -35,50 +26,30 @@
             columns: [
                 { label: '学科名', main: true, value: function (x) { return x.name; } },
                 { label: 'ラベル', tag: true, value: function (x) { return x.label; } },
-                { label: '修業年限', value: function (x) { return x.years + '年制'; } },
-                { label: 'クラス数', value: function (x) { return countClasses(x.id) + 'クラス'; } },
                 { label: '学科ID', mono: true, value: function (x) { return x.id; } }
             ],
             fields: function (item) {
-                var years = [{ value: '', label: '選んでください' }];
-                for (var y = 1; y <= MAX_YEARS; y++) years.push({ value: y, label: y + '年制' });
                 return [
-                    { name: 'name', label: '学科名', value: item.name, required: true, maxlength: 50, placeholder: '例：情報システム科' },
-                    { name: 'label', label: 'ラベル', value: item.label, maxlength: 20, placeholder: '例：情報', hint: LABEL_HINT },
-                    { name: 'years', label: '修業年限', value: item.years || commonYears(), required: true, type: 'select', options: years, hint: 'クラスの学年は、1年からこの年数までの中から選べます。学科を追加するときは、すでにある学科でいちばん多い年数が最初から選ばれています。' }
+                    { name: 'name', label: '学科名', value: item.name, required: true, maxlength: 50, placeholder: '例：会計学科' },
+                    { name: 'label', label: 'ラベル', value: item.label, maxlength: 20, placeholder: '例：会計', hint: LABEL_HINT }
                 ];
             },
-            empty: '学科はまだありません。「学科を追加」から登録してください。クラスを登録する前に、学科の登録が必要です。'
+            empty: '学科はまだありません。「学科を追加」から登録してください。'
         },
         classes: {
             label: 'クラス', key: 'code', saveAction: 'saveClass', deleteAction: 'deleteClass', deleteParam: 'code',
             columns: [
                 { label: 'クラス名', main: true, value: function (x) { return x.name; } },
                 { label: 'ラベル', tag: true, value: function (x) { return x.label; } },
-                { label: '学科', value: function (x) { return shortName(deptById(x.deptId)) || '（不明）'; } },
                 { label: '学年', value: function (x) { return x.grade + '年'; } },
                 { label: 'クラスコード', mono: true, value: function (x) { return x.code; } }
             ],
             fields: function (item) {
-                var depts = [{ value: '', label: '選んでください' }].concat(data.departments.map(function (d) {
-                    return { value: d.id, label: d.name + '（' + d.years + '年制）' };
-                }));
                 return [
-                    { name: 'name', label: 'クラス名', value: item.name, required: true, maxlength: 50, placeholder: '例：情報システム科 3年A組' },
-                    { name: 'label', label: 'ラベル', value: item.label, maxlength: 20, placeholder: '例：情報3A', hint: LABEL_HINT },
-                    { name: 'deptId', label: '学科', value: item.deptId, required: true, type: 'select', options: depts },
-                    { name: 'grade', label: '学年', value: item.grade, required: true, type: 'select', options: [] }
+                    { name: 'grade', label: '学年', value: item.grade, required: true, type: 'select', options: gradeOptions('選んでください'), hint: 'この学校は ' + data.schoolYears + '年制なので、1〜' + data.schoolYears + '年から選べます。' },
+                    { name: 'name', label: 'クラス名', value: item.name, required: true, maxlength: 50, placeholder: '例：1年A組' },
+                    { name: 'label', label: 'ラベル', value: item.label, maxlength: 20, placeholder: '例：1A', hint: LABEL_HINT }
                 ];
-            },
-            // 学科を選んだら、その学科の修業年限に合わせて学年の選択肢を変える
-            onChange: function (form, name, item) {
-                if (name && name !== 'deptId') return;
-                var d = deptById(form.elements.deptId.value);
-                var current = form.elements.grade.value || (item && item.grade) || '';
-                var opts = [{ value: '', label: d ? '選んでください' : '先に学科を選んでください' }];
-                for (var g = 1; d && g <= d.years; g++) opts.push({ value: g, label: g + '年' });
-                RUI.setOptions(form.elements.grade, opts, current);
-                form.elements.grade.disabled = !d;
             },
             empty: 'クラスはまだありません。「クラスを追加」から登録してください。'
         },
@@ -106,24 +77,18 @@
     function sortAll() {
         var jp = function (a, b) { return String(a || '').localeCompare(String(b || ''), 'ja', { numeric: true }); };
         data.departments.sort(function (a, b) { return jp(a.id, b.id); });
-        var deptOrder = function (id) { var i = data.departments.findIndex(function (d) { return d.id === id; }); return i < 0 ? 999 : i; };
-        data.classes.sort(function (a, b) { return deptOrder(a.deptId) - deptOrder(b.deptId) || a.grade - b.grade || jp(a.name, b.name); });
+        data.classes.sort(function (a, b) { return a.grade - b.grade || jp(a.name, b.name); });
         data.qualifications.sort(function (a, b) { return jp(a.category, b.category) || jp(a.name, b.name); });
     }
 
     function openForm(kind, item) {
         var k = KINDS[kind];
         var isNew = !item;
-        if (kind === 'classes' && !data.departments.length) {
-            RUI.toast('先に「学科」タブで学科を登録してください。', 'error');
-            return;
-        }
         item = item || {};
         RUI.form({
             title: isNew ? k.label + 'を追加' : k.label + 'を変更',
             fields: k.fields(item),
             submitLabel: isNew ? '追加する' : '変更を保存する',
-            onChange: k.onChange ? function (form, name) { k.onChange(form, name, item); } : null,
             onSubmit: function (values) {
                 if (!isNew) values[k.key] = item[k.key];
                 return RApi.post(k.saveAction, { item: values }, '保存しています').then(function (res) {
@@ -132,6 +97,30 @@
                         var i = list.findIndex(function (x) { return x[k.key] === res.item[k.key]; });
                         if (i >= 0) list[i] = res.item; else list.push(res.item);
                         sortAll();
+                        draw();
+                        RUI.toast(res.message);
+                    }
+                    return res;
+                });
+            }
+        });
+    }
+
+    /* 学校の修業年限（何年制か）を変える */
+    function openYears() {
+        var opts = [];
+        for (var y = 1; y <= MAX_YEARS; y++) opts.push({ value: y, label: y + '年制' });
+        RUI.form({
+            title: '学校の修業年限を変更',
+            fields: [
+                { name: 'years', label: '修業年限', value: data.schoolYears, required: true, type: 'select', options: opts,
+                  hint: 'クラスの学年は、1年からこの年数までの中から選べます。変えると、学生の卒業予定年度を自動で直します（手で直してある学生は、そのままです）。' }
+            ],
+            submitLabel: '変更を保存する',
+            onSubmit: function (values) {
+                return RApi.post('saveSchoolYears', { years: Number(values.years) }, '保存しています').then(function (res) {
+                    if (res && res.ok) {
+                        data.schoolYears = res.schoolYears;
                         draw();
                         RUI.toast(res.message);
                     }
@@ -176,6 +165,14 @@
         var list = data[tab];
         root.replaceChildren();
 
+        var years = el('section', { class: 'panel school-years' }, [
+            el('div', { class: 'school-years-text' }, [
+                el('p', { class: 'school-years-label', text: '学校の修業年限' }),
+                el('p', { class: 'school-years-value' }, [el('strong', { text: data.schoolYears + '年制' }), el('span', { class: 'muted', text: 'クラスの学年は 1〜' + data.schoolYears + '年から選べます' })])
+            ]),
+            el('button', { type: 'button', class: 'btn btn-sm', onclick: openYears }, [RUI.icon('i-edit'), el('span', { text: '変更' })])
+        ]);
+
         var tabs = el('div', { class: 'tabs', role: 'tablist' });
         Object.keys(KINDS).forEach(function (key) {
             tabs.append(el('button', {
@@ -207,7 +204,7 @@
             });
             panel.append(el('div', { class: 'table-wrap' }, [el('table', { class: 'data-table' }, [el('thead', {}, [thead]), tbody])]));
         }
-        root.append(tabs, panel);
+        root.append(years, tabs, panel);
     }
 
     function render(body) {
@@ -216,6 +213,7 @@
         RApi.all([['masters']], '学科・クラス・資格を読み込んでいます').then(function (all) {
             var res = all[0];
             if (!res || !res.ok) { RUI.toast((res && res.message) || '読み込めませんでした。', 'error'); return; }
+            data.schoolYears = res.schoolYears || 2;
             data.departments = res.departments || [];
             data.classes = res.classes || [];
             data.qualifications = res.qualifications || [];

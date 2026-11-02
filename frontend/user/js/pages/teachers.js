@@ -18,11 +18,12 @@
     }
     function isMe(t) { return me && t.teacherId.toLowerCase() === me.teacherId.toLowerCase(); }
 
-    // 担当クラスのチェックの一覧（学科ごとにまとめる）
+    // 担当クラスのチェックの一覧（学年ごとにまとめる）
     function classOptions() {
-        return data.classes.map(function (c) {
-            var d = data.departments.find(function (x) { return x.id === c.deptId; });
-            return { value: c.code, label: (c.label || c.name) + '（' + c.grade + '年）', group: d ? d.name : 'その他' };
+        return data.classes.slice().sort(function (a, b) {
+            return a.grade - b.grade || String(a.name).localeCompare(String(b.name), 'ja', { numeric: true });
+        }).map(function (c) {
+            return { value: c.code, label: c.label || c.name, group: c.grade + '年' };
         });
     }
 

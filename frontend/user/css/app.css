@@ -113,6 +113,12 @@ button { font: inherit; color: inherit; }
 .tab:hover { color: var(--text); }
 .tab.is-active { border-color: var(--dark); border-bottom: 2px solid var(--surface); background: var(--surface); color: var(--dark); box-shadow: inset 0 4px 0 var(--yellow); }
 .panel-flush { padding: 0; overflow: hidden; }
+.school-years { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; padding: 14px 18px; }
+.school-years-label { font-size: 0.78rem; font-weight: 800; color: var(--text-muted); }
+.school-years-value { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.school-years-value strong { font-size: 1.15rem; font-weight: 900; white-space: nowrap; }
+.school-years-value .muted { font-size: 0.84rem; }
+.school-years .btn { flex-shrink: 0; white-space: nowrap; }
 .list-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 12px; padding: 14px 18px; border-bottom: 2px solid var(--line); }
 .list-count { font-weight: 800; }
 .empty { padding: 36px 18px; text-align: center; font-size: 0.9rem; color: var(--text-muted); }

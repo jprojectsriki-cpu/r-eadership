@@ -21,16 +21,15 @@ const SHEETS = {
   },
   departments: {
     name: '学科',
-    headers: ['学科ID', '学科名', 'ラベル', '修業年限', '作成日時'],
-    widths: [90, 220, 110, 80, 140],
-    textCols: 3,
-    lists: { 4: ['1', '2', '3', '4'] }
+    headers: ['学科ID', '学科名', 'ラベル', '作成日時'],
+    widths: [90, 220, 110, 140],
+    textCols: 3
   },
   classes: {
     name: 'クラス',
-    headers: ['クラスコード', 'クラス名', 'ラベル', '学科ID', '学年', '作成日時'],
-    widths: [110, 200, 110, 90, 70, 140],
-    textCols: 4
+    headers: ['クラスコード', 'クラス名', 'ラベル', '学年', '作成日時'],
+    widths: [110, 200, 110, 70, 140],
+    textCols: 3
   },
   qualifications: {
     name: '資格',
@@ -41,14 +40,14 @@ const SHEETS = {
   students: {
     name: '学生',
     headers: ['学生ID', '学籍番号', '名前', 'ふりがな', '生年月日', '性別', '国籍', '電話番号', 'メールアドレス',
-              'クラスコード', '卒業予定年度', '在籍状態', '希望進路', '進学予定先', '状況', '取得資格', 'メモ', '登録日時', '更新日時'],
-    widths: [90, 100, 140, 160, 100, 70, 100, 120, 200, 100, 100, 80, 90, 160, 90, 200, 240, 140, 140],
-    textCols: 19,
+              '学科ID', 'クラスコード', '卒業予定年度', '在籍状態', '希望進路', '進学予定先', '状況', '取得資格', 'メモ', '登録日時', '更新日時'],
+    widths: [90, 100, 140, 160, 100, 70, 100, 120, 200, 90, 100, 100, 80, 90, 160, 90, 200, 240, 140, 140],
+    textCols: 20,
     lists: {
       6: ['男性', '女性', 'その他', '回答しない'],
-      12: ['在籍', '休学', '退学', '除籍', '卒業'],
-      13: ['就職希望', '進学希望', '帰国希望', '未定'],
-      15: ['未着手', '選考中', '内定', '就職先決定', '選考終了']
+      13: ['在籍', '休学', '退学', '除籍', '卒業'],
+      14: ['就職希望', '進学希望', '帰国希望', '未定'],
+      16: ['未着手', '選考中', '内定', '就職先決定', '選考終了']
     },
     // 列を足したときに、登録済みの学生に入れる値
     defaults: { '在籍状態': '在籍', '希望進路': '未定' }
@@ -151,6 +150,9 @@ function setupSheets() {
   if (settings.getLastRow() < 2) {
     settings.getRange(2, 1, 3, 2).setValues([['学校名', ''], ['学校コード', ''], ['利用開始日', '']]);
   }
+  // 学校の修業年限（何年制か）の欄。なければ「2」で用意する（あとで画面から変えられる）
+  const keys = settings.getRange(1, 1, Math.max(settings.getLastRow(), 1), 1).getValues().map(function (r) { return String(r[0]).trim(); });
+  if (keys.indexOf('修業年限') < 0) settings.appendRow(['修業年限', String(DEFAULT_SCHOOL_YEARS)]);
 
   // シートの並び順をそろえる
   Object.keys(SHEETS).forEach(function (key, i) {
@@ -161,51 +163,6 @@ function setupSheets() {
   ss.setActiveSheet(settings);
 
   Logger.log('シートを準備しました（全' + Object.keys(SHEETS).length + 'シート）。新しく作ったシート：' + (made.length ? made.join('、') : 'なし'));
-}
-
-/**
- * 【1回だけ実行】学科・ラベルを使う形にシートを直す（L-6c）
- * 1. 「学科」シートを作る（setupSheets）
- * 2. 「クラス」「資格」シートの名前の右（C列）に「ラベル」の列を入れる（入力済みのデータは右にずれるだけ）
- * 3. 「クラス」シートの学科が文字で入っていたら、学科シートに学科を作って学科ID（D001など）に置きかえる
- *    （修業年限は、その学科のクラスの一番上の学年。2年より小さいときは2年。あとで画面から直せる）
- * もう直してあるところは何もしないので、2回実行しても大丈夫
- */
-function upgradeMasters() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  [SHEETS.classes, SHEETS.qualifications].forEach(function (def) {
-    const sheet = ss.getSheetByName(def.name);
-    if (!sheet) return;
-    if (String(sheet.getRange(1, 3).getValue()).trim() === 'ラベル') {
-      Logger.log(def.name + '：ラベルの列はすでにあります');
-      return;
-    }
-    sheet.insertColumnAfter(2);
-    sheet.getRange(1, 3).setValue('ラベル');
-    Logger.log(def.name + '：C列にラベルの列を足しました');
-  });
-
-  setupSheets(); // 学科シートを作り、見出し・書式をそろえる
-
-  const classSheet = getSheet_(SHEETS.classes.name);
-  const deptSheet = getSheet_(SHEETS.departments.name);
-  const last = classSheet.getLastRow();
-  if (last >= 2) {
-    const rows = classSheet.getRange(2, 1, last - 1, 5).getValues();
-    const made = {};
-    rows.forEach(function (r, i) {
-      const dept = String(r[3]).trim();
-      if (!dept || /^D\d+$/.test(dept)) return;
-      if (!made[dept]) {
-        const years = Math.min(4, Math.max(2, Math.max.apply(null, rows.filter(function (x) { return String(x[3]).trim() === dept; }).map(function (x) { return Number(x[4]) || 0; }))));
-        made[dept] = nextId_(readRows_(SHEETS.departments), 'D');
-        deptSheet.appendRow([made[dept], dept, '', years, nowText_()]);
-        Logger.log('学科を作りました：' + made[dept] + ' ' + dept + '（' + years + '年制）');
-      }
-      classSheet.getRange(i + 2, 4).setValue(made[dept]);
-    });
-  }
-  testSheets();
 }
 
 /**
@@ -246,6 +203,89 @@ function upgradeNotices() {
   } else {
     Logger.log('お知らせ：すでに新しい形です');
   }
+  setupSheets();
+  testSheets();
+}
+
+/**
+ * 【1回だけ実行】学科・クラスをシンプルな形にする（L-13）
+ * - 修業年限（何年制か）を、学科ごとではなく学校で1つにする（設定シートの「修業年限」。いまの学科でいちばん長い年数を入れる）
+ * - 学科を、クラスではなく学生に持たせる（学生シートの「クラスコード」の左に「学科ID」の列を足し、いまのクラスの学科を写す）
+ * - 「クラス」シートの学科IDの列と、「学科」シートの修業年限の列を消す
+ * - 卒業予定年度は変えない
+ * もう直してあるところは何もしないので、2回実行しても大丈夫
+ */
+function upgradeSimpleStructure() {
+  const deptSheet = getSheet_(SHEETS.departments.name);
+  const classSheet = getSheet_(SHEETS.classes.name);
+  const head = function (sheet, col) { return String(sheet.getRange(1, col).getValue()).trim(); };
+  const deptOld = head(deptSheet, 4) === '修業年限';
+  const classOld = head(classSheet, 4) === '学科ID';
+
+  // 1. 学校の修業年限
+  const settingRows = getSheet_(SHEETS.settings.name).getDataRange().getValues();
+  const hasYears = settingRows.some(function (r) { return String(r[0]).trim() === '修業年限' && String(r[1]).trim(); });
+  if (!hasYears) {
+    let years = DEFAULT_SCHOOL_YEARS;
+    if (deptOld && deptSheet.getLastRow() >= 2) {
+      const list = deptSheet.getRange(2, 4, deptSheet.getLastRow() - 1, 1).getValues().map(function (r) { return Number(r[0]) || 0; });
+      years = Math.min(MAX_YEARS, Math.max.apply(null, list.concat([1])));
+    }
+    setSetting_('修業年限', String(years));
+    Logger.log('学校の修業年限を ' + years + '年制にしました（あとで画面から変えられます）');
+  } else {
+    Logger.log('学校の修業年限：すでにあります（' + getSchoolYears_() + '年制）');
+  }
+  // クラスの学年が修業年限より上なら、修業年限をそのクラスの学年に合わせる
+  if (classSheet.getLastRow() >= 2) {
+    const gradeCol = classOld ? 5 : 4;
+    const top = Math.min(MAX_YEARS, Math.max.apply(null, classSheet.getRange(2, gradeCol, classSheet.getLastRow() - 1, 1).getValues().map(function (r) { return Number(r[0]) || 0; })));
+    if (top > getSchoolYears_()) {
+      setSetting_('修業年限', String(top));
+      Logger.log('いちばん上の学年のクラスに合わせて、学校の修業年限を ' + top + '年制にしました');
+    }
+  }
+
+  // 2. 学生シートに「学科ID」の列を足す
+  addMissingColumns_(SHEETS.students);
+
+  // 3. いまのクラスの学科を、学生に写してから、クラスシートの学科IDの列を消す
+  if (classOld) {
+    const deptOf = {};
+    if (classSheet.getLastRow() >= 2) {
+      classSheet.getRange(2, 1, classSheet.getLastRow() - 1, 4).getValues().forEach(function (r) {
+        deptOf[String(r[0]).trim()] = String(r[3]).trim();
+      });
+    }
+    const stSheet = getSheet_(SHEETS.students.name);
+    const last = stSheet.getLastRow();
+    let copied = 0;
+    if (last >= 2) {
+      const rows = stSheet.getRange(2, 1, last - 1, SHEETS.students.headers.length).getValues();
+      const col = rows.map(function (r) {
+        const now = String(r[ST.dept]).trim();
+        if (now) return [now];
+        const d = deptOf[String(r[ST.cls]).trim()] || '';
+        if (d) copied++;
+        return [d];
+      });
+      stSheet.getRange(2, ST.dept + 1, col.length, 1).setValues(col);
+    }
+    Logger.log('学生 ' + copied + '人に、いまのクラスの学科を写しました');
+    classSheet.deleteColumn(4);
+    Logger.log('クラス：学科IDの列を消しました');
+  } else {
+    Logger.log('クラス：すでに新しい形です');
+  }
+
+  // 4. 学科シートの修業年限の列を消す
+  if (deptOld) {
+    deptSheet.deleteColumn(4);
+    Logger.log('学科：修業年限の列を消しました');
+  } else {
+    Logger.log('学科：すでに新しい形です');
+  }
+
   setupSheets();
   testSheets();
 }
