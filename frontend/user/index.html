@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600;700&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/lp.css">
+    <link rel="stylesheet" href="css/loading.css">
 </head>
 <body>
 
@@ -464,6 +465,9 @@
                 <p><b>お支払いは銀行振込です。</b>お申し込みのあと、請求書をメールでお送りします。ご入金を確認したのち、学校専用の環境をご用意し、学校コードと学校管理者のアカウントを発行します。</p>
             </div>
 
+            <!-- ロボットよけ（人には見えない欄。入力があれば受け付けない） -->
+            <div class="hp" aria-hidden="true"><label>ホームページ<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
             <label class="agree"><input type="checkbox" name="agree" required><span><button type="button" class="text-link" data-open="termsDialog">利用規約</button>と<button type="button" class="text-link" data-open="privacyDialog">プライバシーポリシー</button>に同意する</span></label>
 
             <p class="form-msg" id="applyMsg" role="status" aria-live="polite"></p>
@@ -612,6 +616,7 @@
         </div>
     </dialog>
 
+    <script src="js/loading.js"></script>
     <script src="js/config.js"></script>
     <script src="js/lp.js"></script>
 

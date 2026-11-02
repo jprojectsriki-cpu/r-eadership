@@ -3,5 +3,5 @@
  * 空のあいだは、お申し込みボタンを押すと「受付準備中」と表示される。
  */
 window.READERSHIP_CONFIG = {
-    APPLY_API_URL: ''
+    APPLY_API_URL: 'https://script.google.com/macros/s/AKfycbwi5HziWZ2KmsIoZ31UMV7LhVvsWXbJLKlvD-hpXjSpEPsHbUp_qoUwN4paYQgudeIFTw/exec'
 };

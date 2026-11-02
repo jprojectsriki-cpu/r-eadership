@@ -27,6 +27,18 @@
         el.classList.toggle('is-error', !!isError);
     }
 
+    // 受付完了の表示を、もとのお申し込みの画面にもどす（もう一度申し込むとき）
+    function resetDone() {
+        var f = $('applyForm');
+        var done = f && f.querySelector('.apply-done');
+        if (!done) return;
+        done.remove();
+        Array.prototype.forEach.call(f.children, function (c) { c.hidden = false; });
+        f.reset();
+        var hint = $('planHint');
+        if (hint) hint.textContent = '';
+    }
+
     function openDialog(id) {
         var dlg = $(id);
         if (!dlg || typeof dlg.showModal !== 'function') return;
@@ -40,6 +52,7 @@
         // 「このプランで申し込む」：プランを選んだ状態で、お申し込みを開く
         var applyBtn = e.target.closest('[data-apply]');
         if (applyBtn) {
+            resetDone();
             var radio = document.querySelector('#applyForm input[name="plan"][value="' + applyBtn.getAttribute('data-apply') + '"]');
             if (radio) radio.checked = true;
             setMsg('');
@@ -116,6 +129,49 @@
             setMsg('現在、お申し込みの受付を準備中です。お急ぎの場合は、お問い合わせフォームからご連絡ください。');
             return;
         }
-        // ※ 受付のGASができたら、ここで APPLY_API_URL に送信する
+
+        var data = {
+            action: 'apply', plan: plan, students: students, schoolName: f.schoolName.value.trim(), zip: zip,
+            address: f.address.value.trim(), name: f.name.value.trim(), department: f.department.value.trim(),
+            email: f.email.value.trim(), tel: f.tel.value.trim(), agree: f.agree.checked,
+            website: f.website ? f.website.value : '' // ロボットよけ（画面には出していない欄）
+        };
+        var btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        setMsg('');
+        var req = fetch(CONFIG.APPLY_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) })
+            .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); });
+        (window.RLoading ? window.RLoading.wrap('お申し込みを送っています', req) : req).then(function (res) {
+            if (!res || !res.ok) { setMsg((res && res.message) || 'お申し込みを送れませんでした。', true); return; }
+            showDone(res);
+        }).catch(function (err) {
+            console.error(err);
+            setMsg('通信に失敗しました。時間をおいてもう一度お試しいただくか、お問い合わせフォームからご連絡ください。', true);
+        }).then(function () { btn.disabled = false; });
     });
+
+    // 受け付けたら、お申し込みの画面を「受付完了」の表示にかえる
+    function showDone(res) {
+        var box = form.querySelector('.modal-box') || form;
+        var head = form.querySelector('.modal-head');
+        Array.prototype.forEach.call(form.children, function (c) { if (c !== head) c.hidden = true; });
+        var done = document.createElement('div');
+        done.className = 'apply-done';
+        var p = function (cls, text) { var x = document.createElement('p'); if (cls) x.className = cls; x.textContent = text; return x; };
+        done.append(
+            p('apply-done-title', 'お申し込みを受け付けました'),
+            res.applyNo ? p('apply-done-no', '申込番号：' + res.applyNo) : document.createTextNode(''),
+            p('', (res.email || 'ご入力のメールアドレス') + ' に、受付メールと請求書（PDF）をお送りしました。'),
+            p('', '支払期限' + (res.due ? '（' + res.due + '）' : '') + 'までに、請求書に書かれた口座へお振込みください。ご入金を確認したのち、学校コードと学校管理者のアカウントをお送りします。'),
+            p('note-small', 'メールが届かないときは、迷惑メールのフォルダもご確認ください。それでも見つからないときは、お問い合わせフォームからご連絡ください。')
+        );
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'pop-btn btn-white btn-block';
+        close.setAttribute('data-close', '');
+        close.textContent = '閉じる';
+        done.append(close);
+        form.append(done);
+        box.scrollTop = 0;
+    }
 })();
