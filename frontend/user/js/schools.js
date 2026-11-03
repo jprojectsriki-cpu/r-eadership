@@ -5,4 +5,5 @@
  */
 window.READERSHIP_SCHOOLS = {
     DEMO: 'https://script.google.com/macros/s/AKfycbxJzRDFPrrIbO4IajbxVi3rFzJdMTmpWXjp9cypTLi4iaRtFUcefpYEyUK5s74TN_dV/exec',
+    DAIIKU: 'https://script.google.com/macros/s/AKfycbycXUic3VNUrF7jKiu8PG04-9hONSqA2wfDbncm0mgQ_KDOhjfNT3xXyZ3MUT-2adZ8/exec',
 };
