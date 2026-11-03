@@ -1,0 +1,72 @@
+/* R-eadership 操作マニュアル */
+:root {
+    --yellow: #FFDE00; --yellow-soft: #FFF6BF; --blue: #2B50FF; --dark: #1E1B18;
+    --bg: #FAF7F0; --surface: #FFFFFF; --line: #E4DED3; --text: #1E1B18; --muted: #7A726B;
+    --font: 'M PLUS Rounded 1c', sans-serif; --font-en: 'Fredoka', 'M PLUS Rounded 1c', sans-serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-padding-top: 120px; }
+body { font-family: var(--font); font-weight: 500; color: var(--text); background: var(--bg); line-height: 1.8; -webkit-font-smoothing: antialiased; }
+a { color: var(--blue); }
+
+/* 上の帯 */
+.m-top { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 3px solid var(--yellow); }
+.m-top-in { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; gap: 14px; padding: 10px 20px; }
+.m-brand { display: flex; align-items: center; gap: 8px; color: var(--dark); text-decoration: none; font-family: var(--font-en); font-weight: 700; font-size: 1.1rem; }
+.m-title { font-weight: 800; color: var(--muted); padding-left: 14px; border-left: 2px solid var(--line); }
+.m-print { margin-left: auto; padding: 6px 14px; border: 2px solid var(--dark); border-radius: 10px; background: var(--surface); font: inherit; font-weight: 800; font-size: 0.85rem; cursor: pointer; box-shadow: 2px 2px 0 var(--dark); }
+.m-print:hover { background: var(--yellow-soft); }
+.m-tabs { max-width: 1120px; margin: 0 auto; display: flex; gap: 6px; padding: 0 20px; }
+.m-tab { padding: 8px 18px; border: 2px solid transparent; border-bottom: none; border-radius: 10px 10px 0 0; color: var(--muted); font-weight: 800; text-decoration: none; }
+.m-tab.is-active { border-color: var(--dark); background: var(--yellow); color: var(--dark); }
+
+/* 本文 */
+.m-wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 40px; }
+.m-part { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; align-items: start; }
+.m-part[hidden] { display: none; }
+.m-toc { position: sticky; top: 120px; padding: 16px; background: var(--surface); border: 2px solid var(--dark); border-radius: 12px; font-size: 0.88rem; }
+.m-toc-h { font-weight: 900; margin-bottom: 6px; }
+.m-toc ol { padding-left: 1.3em; }
+.m-toc li { margin: 4px 0; }
+.m-toc a { color: var(--text); text-decoration: none; }
+.m-toc a:hover { color: var(--blue); text-decoration: underline; }
+.m-body { min-width: 0; padding: 28px 32px; background: var(--surface); border: 2px solid var(--dark); border-radius: 12px; box-shadow: 3px 3px 0 var(--dark); }
+.m-body h1 { font-size: 1.6rem; font-weight: 900; line-height: 1.4; }
+.m-lead { margin: 8px 0 8px; color: #4B4540; }
+.m-body h2 { margin: 40px 0 12px; padding: 6px 12px; font-size: 1.3rem; font-weight: 900; line-height: 1.5; background: var(--yellow-soft); border-left: 6px solid var(--yellow); border-radius: 4px; }
+.m-body h3 { margin: 28px 0 8px; font-size: 1.08rem; font-weight: 900; }
+.m-body p { margin: 10px 0; }
+.m-body ol, .m-body ul { margin: 10px 0; padding-left: 1.5em; }
+.m-body li { margin: 4px 0; }
+.m-body strong { font-weight: 900; }
+.m-body table { width: 100%; margin: 16px 0; border-collapse: collapse; font-size: 0.92rem; }
+.m-body th, .m-body td { padding: 8px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+.m-body th { background: var(--bg); font-weight: 800; }
+
+/* 画面の写真 */
+.shot { margin: 18px 0 22px; text-align: center; }
+.shot img { display: inline-block; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 2px 10px rgba(30, 27, 24, 0.12); }
+.shot figcaption { margin-top: 6px; font-size: 0.82rem; color: var(--muted); }
+
+.m-foot { max-width: 1120px; margin: 0 auto; padding: 0 20px 32px; display: flex; justify-content: space-between; gap: 12px; font-size: 0.8rem; color: var(--muted); }
+
+@media (max-width: 860px) {
+    .m-part { grid-template-columns: 1fr; gap: 16px; }
+    .m-toc { position: static; }
+    .m-body { padding: 20px 16px; }
+    .m-title { display: none; }
+    .m-foot { flex-direction: column; }
+}
+
+/* 印刷・PDF：いま開いている方のマニュアルだけを、写真つきで印刷する */
+@media print {
+    body { background: #fff; }
+    .m-top, .m-toc, .m-print { display: none !important; }
+    .m-wrap { padding: 0; max-width: none; }
+    .m-part { display: block; }
+    .m-body { border: none; box-shadow: none; padding: 0; }
+    .m-body h2 { break-after: avoid; }
+    .shot { break-inside: avoid; }
+    .shot img { max-height: 120mm; width: auto; box-shadow: none; }
+    a { color: inherit; text-decoration: none; }
+}

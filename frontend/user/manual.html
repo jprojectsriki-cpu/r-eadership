@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作マニュアル | R-eadership</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/manual.css">
+</head>
+<body>
+    <!-- R-eadership 操作マニュアル（学校管理者・教員）
+         画面の写真は、架空の学校「R-eadership デモ校」と架空の学生・先生で撮ったもの -->
+    <header class="m-top">
+        <div class="m-top-in">
+            <a class="m-brand" href="app.html"><img src="img/logo.png" alt="" width="34" height="34"><span>R-eadership</span></a>
+            <span class="m-title">操作マニュアル</span>
+            <button type="button" class="m-print" id="printBtn">印刷・PDF</button>
+        </div>
+        <nav class="m-tabs" aria-label="マニュアルの切り替え">
+            <a href="#admin" class="m-tab" data-tab="admin">学校管理者</a>
+            <a href="#teacher" class="m-tab" data-tab="teacher">教員</a>
+        </nav>
+    </header>
+
+    <div class="m-wrap">
+        <section class="m-part" id="admin" data-part="admin">
+            <aside class="m-toc"><p class="m-toc-h">目次</p><ol><li><a href="#admin-login">はじめに：ログインとパスワード変更</a></li>
+<li><a href="#admin-masters">最初の準備：修業年限・学科・クラス・資格</a></li>
+<li><a href="#admin-teachers">教員アカウント</a></li>
+<li><a href="#admin-students">学生名簿</a></li>
+<li><a href="#admin-entries">応募管理</a></li>
+<li><a href="#admin-dashboard">ダッシュボード</a></li>
+<li><a href="#admin-notices">お知らせ</a></li></ol></aside>
+            <article class="m-body">
+                <h1>学校管理者の操作</h1>
+                <p class="m-lead">学校管理者は、学校のすべてのクラスの学生・応募を扱い、教員アカウントと学科・クラス・資格を管理します。はじめて使うときは、上から順に進めてください。</p>
+                <h2 id="admin-login">はじめに：ログインとパスワード変更</h2>
+<p>発行メール（件名「【R-eadership】ご利用の準備ができました」）に書かれた学校コード・教員ID・仮のパスワードでログインし、すぐに自分のパスワードに変えます。</p>
+<ol>
+<li>メールの「ログイン画面」の URL を開き、学校コード・教員ID・パスワードを入れて「ログイン」を押します。学校コードは小文字でも通ります。</li>
+<li>画面右上の「パスワード変更」を押し、いまの（仮の）パスワードと新しいパスワード（8〜64文字）を入れて「変更する」を押します。</li>
+<li>変えたら、発行メールは削除します。</li>
+</ol>
+<figure class="shot"><img src="img/manual/b01.png" alt="ログイン画面"><figcaption>ログイン画面</figcaption></figure>
+<figure class="shot"><img src="img/manual/b02.png" alt="パスワード変更"><figcaption>パスワード変更</figcaption></figure>
+<p>ログインは6時間で切れます。別の端末で同じ教員IDでログインすると、前の端末はログアウトします。パスワードを5回まちがえると、15分ログインできません。学校管理者のパスワードを忘れたときは、提供者の<a target="_blank" rel="noopener" href="https://jprojectsriki-cpu.github.io/rikis_collection/#contact">お問い合わせフォーム</a>から連絡します。</p>
+<h2 id="admin-masters">最初の準備：修業年限・学科・クラス・資格</h2>
+<p>左のメニュー「<strong>学科・クラス・資格</strong>」で、学生名簿のプルダウンに使うものを先に登録します。学科とクラスは関係しません。学生ごとに、学科とクラスをそれぞれ選びます（例：1年A組に、会計学科と観光学科の学生がいてもよい）。</p>
+<ol>
+<li><strong>学校の修業年限</strong>：いちばん上の枠の「変更」で、学校が何年制か（1〜4年）を選びます。学科ごとに年数がちがうときは、いちばん長い年数にします。クラスの学年は、1年からこの年数までから選べます。</li>
+<li><strong>学科</strong>：「学科」タブ →「学科を追加」で、学科名とラベルを入れます。</li>
+<li><strong>クラス</strong>：「クラス」タブ →「クラスを追加」で、学年・クラス名・ラベルを入れます。</li>
+<li><strong>資格</strong>：「資格」タブ →「資格を追加」で、資格名・ラベル・分類を入れます。</li>
+</ol>
+<figure class="shot"><img src="img/manual/b04.png" alt="学科・クラス・資格（上が学校の修業年限、下が学科の一覧）"><figcaption>学科・クラス・資格（上が学校の修業年限、下が学科の一覧）</figcaption></figure>
+<figure class="shot"><img src="img/manual/b05.png" alt="学校の修業年限を変える"><figcaption>学校の修業年限を変える</figcaption></figure>
+<figure class="shot"><img src="img/manual/d01.png" alt="学科を追加する"><figcaption>学科を追加する</figcaption></figure>
+<figure class="shot"><img src="img/manual/b06.png" alt="クラスの一覧"><figcaption>クラスの一覧</figcaption></figure>
+<figure class="shot"><img src="img/manual/b07.png" alt="クラスを追加する"><figcaption>クラスを追加する</figcaption></figure>
+<figure class="shot"><img src="img/manual/d02.png" alt="資格の一覧（「資格」タブ）"><figcaption>資格の一覧（「資格」タブ）</figcaption></figure>
+<figure class="shot"><img src="img/manual/d03.png" alt="資格を追加する"><figcaption>資格を追加する</figcaption></figure>
+<ul>
+<li><strong>ラベル</strong>は、学生名簿などに出す短い名前です（例：「全経簿記能力検定試験 2級」→「簿記2級」）。空なら名前をそのまま出します。名前もラベルも、同じものは登録できません。</li>
+<li>卒業予定年度は「今年度＋学校の修業年限−クラスの学年」で自動で入ります（年度は4月はじまり）。修業年限やクラスの学年を変えると、学生の卒業予定年度も自動で直ります（手で直した学生はそのまま）。</li>
+<li>使われているものは削除できません（学科：学生がいる、クラス：学生か担当の教員がいる、資格：取得した学生がいる）。</li>
+</ul>
+<h2 id="admin-teachers">教員アカウント</h2>
+<p>左のメニュー「<strong>教員アカウント</strong>」で、先生方のアカウントを発行します。教員は、担当クラスの学生だけを見られます。</p>
+<ol>
+<li>「教員アカウントを発行」を押し、教員ID（英数字と - _ の3〜20文字。あとから変えられません）・名前・権限・担当クラスを入れて「発行する」。</li>
+<li>仮のパスワードが<strong>1回だけ</strong>表示されます。学校コード・教員ID・仮のパスワードを本人に伝え、ログイン後に「パスワード変更」で変えてもらいます。</li>
+<li>一覧の各行で、「変更」（名前・権限・担当クラス）、「PW再設定」（新しい仮のパスワードを発行）、「停止」（ログインできなくする。「再開」でもとに戻る）ができます。</li>
+</ol>
+<figure class="shot"><img src="img/manual/b08.png" alt="教員アカウントの一覧"><figcaption>教員アカウントの一覧</figcaption></figure>
+<figure class="shot"><img src="img/manual/b09.png" alt="教員アカウントを発行する（担当クラスは学年ごとに並ぶ）"><figcaption>教員アカウントを発行する（担当クラスは学年ごとに並ぶ）</figcaption></figure>
+<figure class="shot"><img src="img/manual/b10.png" alt="仮のパスワードはこの画面でだけ表示される"><figcaption>仮のパスワードはこの画面でだけ表示される</figcaption></figure>
+<figure class="shot"><img src="img/manual/d04.png" alt="「変更」：名前・権限・担当クラスを変える（教員IDは変えられない）"><figcaption>「変更」：名前・権限・担当クラスを変える（教員IDは変えられない）</figcaption></figure>
+<figure class="shot"><img src="img/manual/d05.png" alt="「PW再設定」：新しい仮のパスワードを発行する"><figcaption>「PW再設定」：新しい仮のパスワードを発行する</figcaption></figure>
+<figure class="shot"><img src="img/manual/d06.png" alt="「停止」：ログインできなくする"><figcaption>「停止」：ログインできなくする</figcaption></figure>
+<table>
+<thead>
+<tr>
+<th>権限</th>
+<th>見られる学生</th>
+<th>できること</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>学校管理者</td>
+<td>すべてのクラス</td>
+<td>すべて。教員アカウント、学科・クラス・資格、学生の登録・基本情報の変更・削除、CSV</td>
+</tr>
+<tr>
+<td>教員</td>
+<td>担当クラスだけ</td>
+<td>クラス移動・在籍状態の変更、希望進路・資格・メモ、応募と指導記録、お知らせ</td>
+</tr>
+</tbody>
+</table>
+<p>自分のアカウントは停止できません。ほかの先生のアカウントを変更すると、その先生は一度ログアウトします。</p>
+<h2 id="admin-students">学生名簿</h2>
+<p>左のメニュー「<strong>学生名簿</strong>」で、学生の登録から進級・卒業までを扱います。上の人数のカードを押すと、その在籍状態でしぼりこめます。一覧は30人ずつで、「取得資格」タブでは資格ごとの ✓ の表に切り替わります。</p>
+<figure class="shot"><img src="img/manual/b11.png" alt="学生名簿の一覧"><figcaption>学生名簿の一覧</figcaption></figure>
+<h3>1人ずつ登録する</h3>
+<p>「学生を登録」を押し、学籍番号・名前・学科・クラスを入れます（ふりがな・生年月日・性別・国籍・電話・メールは任意）。クラスを選ぶと、学年と卒業予定年度が自動で入ります。留年などのときは、卒業予定年度を直します。</p>
+<figure class="shot"><img src="img/manual/d07.png" alt="学生を登録する（入力画面の上の方）"><figcaption>学生を登録する（入力画面の上の方）</figcaption></figure>
+<figure class="shot"><img src="img/manual/b12.png" alt="学生を登録する（入力画面の下の方）"><figcaption>学生を登録する（入力画面の下の方）</figcaption></figure>
+<h3>CSVでまとめて登録する</h3>
+<ol>
+<li>「CSVで登録」→「ひな形（CSV）」をダウンロードし、Excel などで学生を入れます。必ず入れるのは「学籍番号」「名前」「学科」「クラス」です（学科・クラスはラベルでも名前でもよい）。</li>
+<li>CSV 形式で保存し、「CSVファイル」で選びます。まず内容を確かめるので、直すところがあれば行ごとに表示されます。</li>
+<li>まちがいがなければ「登録する」。1回に500人まで。1件でもまちがいがあると、1件も登録されません。</li>
+</ol>
+<figure class="shot"><img src="img/manual/b13.png" alt="CSVでまとめて登録"><figcaption>CSVでまとめて登録</figcaption></figure>
+<figure class="shot"><img src="img/manual/d08.png" alt="直すところがあるとき（行ごとに理由が出る。「登録する」は押せない）"><figcaption>直すところがあるとき（行ごとに理由が出る。「登録する」は押せない）</figcaption></figure>
+<figure class="shot"><img src="img/manual/d09.png" alt="まちがいがないとき（「登録する」を押す）"><figcaption>まちがいがないとき（「登録する」を押す）</figcaption></figure>
+<h3>詳しい画面</h3>
+<p>学生の名前を押すと、基本情報・応募・指導記録・変更履歴が開きます。下のボタンで、クラス移動・在籍状態の変更・希望進路と資格とメモ・基本情報の変更・削除ができます。</p>
+<figure class="shot"><img src="img/manual/b14.png" alt="学生の詳しい画面"><figcaption>学生の詳しい画面</figcaption></figure>
+<figure class="shot"><img src="img/manual/b15.png" alt="詳しい画面の下の方（応募・指導記録・変更履歴）"><figcaption>詳しい画面の下の方（応募・指導記録・変更履歴）</figcaption></figure>
+<figure class="shot"><img src="img/manual/d10.png" alt="「基本情報の変更」：学科や卒業予定年度もここで直す"><figcaption>「基本情報の変更」：学科や卒業予定年度もここで直す</figcaption></figure>
+<figure class="shot"><img src="img/manual/d11.png" alt="「在籍状態の変更」：理由は必須"><figcaption>「在籍状態の変更」：理由は必須</figcaption></figure>
+<ul>
+<li><strong>クラス移動・在籍状態の変更</strong>（在籍・休学・退学・除籍・卒業）は、理由が必須で、変更履歴に残ります。学年を変えるときは、その学年のクラスへ移動します。</li>
+<li><strong>学科の変更</strong>は「基本情報の変更」で行います。</li>
+<li><strong>削除</strong>は、まちがえて登録したときだけです。応募や指導記録がある学生は削除できないので、退学・卒業などは在籍状態で表します。</li>
+<li><strong>就活の状況</strong>（未着手・選考中・内定・就職先決定・選考終了）は、応募の結果から自動で決まります。</li>
+</ul>
+<h3>進級・卒業のとき（まとめて変更）</h3>
+<ol>
+<li>しぼりこみで対象の学生を出します（例：学年「2年」）。</li>
+<li>一覧の左のチェックで学生を選びます（見出しのチェックで、そのページの全員）。</li>
+<li>「まとめてクラス移動」（進級）か「まとめて在籍状態の変更」（卒業）を押し、理由を入れて実行します。全員に同じ理由が残ります。</li>
+</ol>
+<p>年度末は、先に最上級生を「卒業」にしてから、下の学年を上の学年のクラスへ移動すると、名簿がまざりません。</p>
+<figure class="shot"><img src="img/manual/b16.png" alt="2年生を全員選んだところ"><figcaption>2年生を全員選んだところ</figcaption></figure>
+<figure class="shot"><img src="img/manual/d12.png" alt="まとめてクラス移動（進級：1年生を2年A組へ）"><figcaption>まとめてクラス移動（進級：1年生を2年A組へ）</figcaption></figure>
+<figure class="shot"><img src="img/manual/b17.png" alt="まとめて在籍状態を「卒業」にする"><figcaption>まとめて在籍状態を「卒業」にする</figcaption></figure>
+<p>「卒業」にした学生のデータは、卒業から3年たった4月に、応募・指導記録・履歴といっしょに自動で削除されます。</p>
+<h3>CSVで書き出す</h3>
+<p>「CSVで書き出し」で、いましぼりこんでいる学生を、すべてのページの分まとめて保存します（学校管理者だけ）。個人情報が入るので、使い終わったらパソコンから削除します。</p>
+<figure class="shot"><img src="img/manual/d13.png" alt="CSVで書き出す（いまの条件の人数が出る）"><figcaption>CSVで書き出す（いまの条件の人数が出る）</figcaption></figure>
+<h2 id="admin-entries">応募管理</h2>
+<p>左のメニュー「<strong>応募管理</strong>」で、学生ごとの応募と選考の進み具合を記録します。一覧は、次の予定が近い順に並びます。くわしい操作は「<a href="#teacher-entries">教員の操作</a>」の「応募管理」と同じです。</p>
+<figure class="shot"><img src="img/manual/b18.png" alt="応募管理の一覧"><figcaption>応募管理の一覧</figcaption></figure>
+<figure class="shot"><img src="img/manual/d14.png" alt="応募を登録する（学年・クラス・名前で学生をしぼりこむ）"><figcaption>応募を登録する（学年・クラス・名前で学生をしぼりこむ）</figcaption></figure>
+<figure class="shot"><img src="img/manual/b20.png" alt="応募の詳しい画面（選考の進み具合と指導記録）"><figcaption>応募の詳しい画面（選考の進み具合と指導記録）</figcaption></figure>
+<figure class="shot"><img src="img/manual/b21.png" alt="進み具合を更新する"><figcaption>進み具合を更新する</figcaption></figure>
+<ul>
+<li>応募ごとの「進み具合を更新」で、選考の段階（エントリー〜最終面接）と結果（選考中・内定・内定承諾・不採用・辞退）を変えます。「内定承諾」は1人1社だけです。</li>
+<li>「CSVで書き出し」で、いまの条件の応募を保存できます（学校管理者だけ）。</li>
+<li>指導記録は、書いた本人と学校管理者が直したり消したりできます。</li>
+</ul>
+<figure class="shot"><img src="img/manual/d15.png" alt="応募をCSVで書き出す"><figcaption>応募をCSVで書き出す</figcaption></figure>
+<h2 id="admin-dashboard">ダッシュボード</h2>
+<p>ログインすると最初に開く画面です。卒業予定年度（はじめは今年度に卒業する学年）と学科でしぼりこめます。数えるのは、在籍と卒業の学生です。</p>
+<figure class="shot"><img src="img/manual/b03.png" alt="ダッシュボード（上）：学生数・就職希望・就職決定率・内定率、お知らせ、就活の状況と希望進路"><figcaption>ダッシュボード（上）：学生数・就職希望・就職決定率・内定率、お知らせ、就活の状況と希望進路</figcaption></figure>
+<figure class="shot"><img src="img/manual/b24.png" alt="ダッシュボード（下）：会社ごと・進学先ごとの人数、クラスごとの就職決定率、3日以内の予定"><figcaption>ダッシュボード（下）：会社ごと・進学先ごとの人数、クラスごとの就職決定率、3日以内の予定</figcaption></figure>
+<ul>
+<li><strong>就職決定率</strong> ＝「内定承諾」の学生 ÷ 希望進路が「就職希望」の学生。<strong>内定率</strong>は、内定と内定承諾を合わせた割合です。</li>
+<li><strong>3日以内の予定</strong>には、応募の「次の予定日」が今日から3日以内のものが出ます。</li>
+</ul>
+<h2 id="admin-notices">お知らせ</h2>
+<p>左のメニュー「<strong>お知らせ</strong>」で、先生方への連絡を書きます。未読があると、メニューに赤い数字が出ます。</p>
+<ol>
+<li>「お知らせを書く」を押し、タイトル・本文・重要かどうか・公開範囲を入れて「投稿する」。</li>
+<li>公開範囲は「全体（すべての先生）」「学校管理者」「個人（宛先の先生を何人でも）」から選びます。</li>
+<li>自分のお知らせを開くと、だれが読んだかがわかります。返信もできます。</li>
+</ol>
+<figure class="shot"><img src="img/manual/b22.png" alt="お知らせの一覧"><figcaption>お知らせの一覧</figcaption></figure>
+<figure class="shot"><img src="img/manual/b23.png" alt="お知らせを書く"><figcaption>お知らせを書く</figcaption></figure>
+<figure class="shot"><img src="img/manual/d17.png" alt="自分のお知らせを開いたところ（「読んだ人」と返信）"><figcaption>自分のお知らせを開いたところ（「読んだ人」と返信）</figcaption></figure>
+            </article>
+        </section>
+        <section class="m-part" id="teacher" data-part="teacher" hidden>
+            <aside class="m-toc"><p class="m-toc-h">目次</p><ol><li><a href="#teacher-login">はじめに：ログインとパスワード変更</a></li>
+<li><a href="#teacher-students">ダッシュボードと学生名簿</a></li>
+<li><a href="#teacher-entries">応募管理</a></li>
+<li><a href="#teacher-notices">お知らせ</a></li></ol></aside>
+            <article class="m-body">
+                <h1>教員の操作</h1>
+                <p class="m-lead">教員は、<strong>担当クラスの学生だけ</strong>を見て、応募と指導記録を登録します。学生の登録や基本情報の変更は、学校管理者が行います。</p>
+                <h2 id="teacher-login">はじめに：ログインとパスワード変更</h2>
+<p>学校管理者から受け取った学校コード・教員ID・仮のパスワードでログインし、すぐに自分のパスワードに変えます。</p>
+<ol>
+<li>ログイン画面で、学校コード・教員ID・仮のパスワードを入れて「ログイン」。</li>
+<li>画面右上の「パスワード変更」で、仮のパスワードを自分のパスワード（8〜64文字）に変えます。</li>
+<li>パスワードを忘れたときは、学校管理者に「パスワードの再設定」を頼みます。</li>
+</ol>
+<figure class="shot"><img src="img/manual/b01.png" alt="ログイン画面"><figcaption>ログイン画面</figcaption></figure>
+<p>教員が見られるのは、<strong>担当クラスの学生だけ</strong>です。メニューは「ダッシュボード」「学生名簿」「応募管理」「お知らせ」の4つです。担当クラスがちがうときは、学校管理者に直してもらいます。</p>
+<h2 id="teacher-students">ダッシュボードと学生名簿</h2>
+<p>ダッシュボードには、担当クラスの学生の就職決定率・内定率、3日以内の面接などの予定、お知らせが出ます。</p>
+<figure class="shot"><img src="img/manual/c01.png" alt="教員のダッシュボード（担当クラスの学生で集計）"><figcaption>教員のダッシュボード（担当クラスの学生で集計）</figcaption></figure>
+<p>「学生名簿」には、担当クラスの学生だけが並びます。学生の名前を押すと、詳しい画面が開きます。</p>
+<figure class="shot"><img src="img/manual/c02.png" alt="教員の学生名簿"><figcaption>教員の学生名簿</figcaption></figure>
+<figure class="shot"><img src="img/manual/c03.png" alt="詳しい画面（下に「クラス移動」「在籍状態の変更」「希望進路・資格・メモ」）"><figcaption>詳しい画面（下に「クラス移動」「在籍状態の変更」「希望進路・資格・メモ」）</figcaption></figure>
+<table>
+<thead>
+<tr>
+<th>やりたいこと</th>
+<th>押すボタン</th>
+<th>気をつけること</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>希望進路・進学予定先・取得資格・メモを入れる</td>
+<td>希望進路・資格・メモ</td>
+<td>進学予定先は、希望進路が「進学希望」のときだけ</td>
+</tr>
+<tr>
+<td>別のクラスへ移す</td>
+<td>クラス移動</td>
+<td>理由が必須。移した先が担当外なら、その学生は見えなくなる</td>
+</tr>
+<tr>
+<td>休学・退学・卒業などにする</td>
+<td>在籍状態の変更</td>
+<td>理由が必須。変更履歴に残る</td>
+</tr>
+<tr>
+<td>名前・学籍番号・学科などを直す</td>
+<td>（なし）</td>
+<td>学校管理者に頼む</td>
+</tr>
+</tbody>
+</table>
+<figure class="shot"><img src="img/manual/c04.png" alt="希望進路・取得資格・メモ"><figcaption>希望進路・取得資格・メモ</figcaption></figure>
+<figure class="shot"><img src="img/manual/c05.png" alt="クラス移動（理由は必須）"><figcaption>クラス移動（理由は必須）</figcaption></figure>
+<p>担当クラスの学生を全員選んで、まとめてクラス移動・在籍状態の変更もできます（やり方は「<a href="#admin-students">学校管理者の操作</a>」の「進級・卒業のとき」と同じ）。</p>
+<h2 id="teacher-entries">応募管理</h2>
+<p>学生が会社に応募したら登録し、選考が進むたびに「進み具合」を更新します。学生の「就活の状況」とダッシュボードの数字は、この更新から自動で決まります。</p>
+<figure class="shot"><img src="img/manual/c07.png" alt="応募管理の一覧（次の予定が近い順）"><figcaption>応募管理の一覧（次の予定が近い順）</figcaption></figure>
+<h3>応募を登録する</h3>
+<ol>
+<li>「応募を登録」を押します（学生の詳しい画面の「応募を登録」からでも同じ）。</li>
+<li>学年・クラス・名前でしぼりこんで学生を選び、会社名（必須）・職種・勤務地・給与・応募日を入れて「登録する」。</li>
+<li>同じ学生が、同じ会社に「選考中」の応募をもう1つ登録することはできません。</li>
+</ol>
+<figure class="shot"><img src="img/manual/d14.png" alt="応募を登録する"><figcaption>応募を登録する</figcaption></figure>
+<h3>選考の進み具合を更新する</h3>
+<ol>
+<li>一覧で応募を押して詳しい画面を開き、「進み具合を更新」。</li>
+<li>選考の段階と結果を選びます。結果が「選考中」のときは、次の予定日・時刻・内容も入れられます（3日以内になるとダッシュボードに出ます）。</li>
+<li>段階は、二次面接のない会社などは飛ばしてかまいません。内定を受けたら「内定」、入社を決めたら「内定承諾」にします（内定承諾は1人1社）。</li>
+</ol>
+<figure class="shot"><img src="img/manual/b20.png" alt="応募の詳しい画面（選考の進み具合と指導記録）"><figcaption>応募の詳しい画面（選考の進み具合と指導記録）</figcaption></figure>
+<figure class="shot"><img src="img/manual/b21.png" alt="進み具合を更新する"><figcaption>進み具合を更新する</figcaption></figure>
+<table>
+<thead>
+<tr>
+<th>結果</th>
+<th>学生の「就活の状況」</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内定承諾が1つでもある</td>
+<td>就職先決定</td>
+</tr>
+<tr>
+<td>内定がある</td>
+<td>内定</td>
+</tr>
+<tr>
+<td>選考中がある</td>
+<td>選考中</td>
+</tr>
+<tr>
+<td>不採用・辞退だけ</td>
+<td>選考終了</td>
+</tr>
+<tr>
+<td>応募がない</td>
+<td>未着手</td>
+</tr>
+</tbody>
+</table>
+<h3>指導記録をつける</h3>
+<p>応募の詳しい画面（または学生の詳しい画面）の「記録を追加」で、面接練習や履歴書の添削などを残します。自分が書いた記録は、「書き直す」「削除」できます。</p>
+<h2 id="teacher-notices">お知らせ</h2>
+<p>学校からの連絡は「お知らせ」に届きます。未読があると、メニューの「お知らせ」に赤い数字が出ます。</p>
+<ol>
+<li>一覧でお知らせを押すと、本文が開き、既読になります（投稿した人には、だれが読んだかがわかります）。</li>
+<li>下の欄に書いて「返信する」で、返信できます。</li>
+<li>学校管理者への連絡やお願い（学生の名前の直し、担当クラスの変更など）は、「お知らせを書く」で公開範囲を「学校管理者」にして投稿します。特定の先生だけに送るときは「個人」を選び、宛先の先生にチェックします。</li>
+</ol>
+<figure class="shot"><img src="img/manual/c06.png" alt="お知らせを開いて返信する"><figcaption>お知らせを開いて返信する</figcaption></figure>
+<p>書いたお知らせと返信は、自分で削除できます。見えるのは、公開範囲に入る人と投稿した本人だけです。</p>
+            </article>
+        </section>
+    </div>
+
+    <footer class="m-foot">
+        <p>画面の写真は、架空の学校・学生・先生のデータで撮影したものです。</p>
+        <p>©ReicherRick</p>
+    </footer>
+
+    <script>
+    (function () {
+        'use strict';
+        var parts = document.querySelectorAll('[data-part]');
+        var tabs = document.querySelectorAll('.m-tab');
+        // URLの # から、どちらのマニュアルを見せるかを決める（#teacher-entries なら教員）
+        function show() {
+            var h = (location.hash || '').slice(1);
+            var key = h.indexOf('teacher') === 0 ? 'teacher' : 'admin';
+            parts.forEach(function (p) { p.hidden = p.getAttribute('data-part') !== key; });
+            tabs.forEach(function (t) {
+                var on = t.getAttribute('data-tab') === key;
+                t.classList.toggle('is-active', on);
+                if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+            });
+            if (h === 'admin' || h === 'teacher' || !h) window.scrollTo(0, 0);
+            else { var el = document.getElementById(h); if (el) el.scrollIntoView(); }
+        }
+        window.addEventListener('hashchange', show);
+        show();
+        document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
+    })();
+    </script>
+</body>
+</html>

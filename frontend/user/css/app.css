@@ -94,7 +94,12 @@ button { font: inherit; color: inherit; }
 .scrim { display: none; }
 
 /* 中身 */
-.main { padding: 28px 32px 48px; outline: none; min-width: 0; }
+.main { display: flex; flex-direction: column; padding: 28px 32px 20px; outline: none; min-width: 0; }
+#pageBody { flex: 1 0 auto; }
+/* 下の帯（右寄せ：操作マニュアル　©ReicherRick） */
+.app-footer { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--text-muted); }
+.app-footer a { color: var(--text-sub); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.app-footer a:hover { color: var(--blue); }
 .page-head { margin-bottom: 20px; }
 .page-title { font-size: 1.45rem; font-weight: 900; line-height: 1.4; }
 .page-desc { margin-top: 2px; font-size: 0.88rem; color: var(--text-muted); }
@@ -486,7 +491,7 @@ input[type=file] { font: inherit; font-size: 0.88rem; }
     .nav-logout { display: flex; }
     .nav-pw { margin-top: 22px; border-top: 2px dashed var(--line); border-radius: 0; padding-top: 16px; }
     .pw-btn { display: none; }
-    .main { padding: 22px 16px 40px; }
+    .main { padding: 22px 16px 16px; }
     .page-title { font-size: 1.25rem; }
 }
 @media (max-width: 640px) {

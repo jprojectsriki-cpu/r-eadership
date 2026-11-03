@@ -122,6 +122,8 @@
         $('sideRole').textContent = $('userRole').textContent;
         $('sideRole').classList.toggle('is-admin', isAdmin());
         document.querySelectorAll('[data-admin-only]').forEach(function (el) { el.hidden = !isAdmin(); });
+        // 下の「操作マニュアル」は、権限に合ったほうを開く
+        $('manualLink').href = 'manual.html#' + (isAdmin() ? 'admin' : 'teacher');
     }
 
     function start() {
