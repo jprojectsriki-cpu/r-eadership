@@ -284,6 +284,10 @@ input[type=file] { font: inherit; font-size: 0.88rem; }
 .student-table td.cell-student { width: 220px; max-width: 220px; }
 .name-clip { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qual-table .name-clip { max-width: 132px; }
+/* 名前を上、ふりがなを下の2行にする（どちらも入りきらないときは「…」） */
+.student-table .name-clip { white-space: normal; }
+.student-table .name-clip .st-name, .student-table .name-clip .kana { display: block; margin-left: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.45; }
+.student-table .name-clip .kana { font-size: 0.68rem; }
 .data-table tbody tr.is-selected { background: #EEF1FF; }
 .cell-num { text-align: right; white-space: nowrap; font-family: var(--font-en); }
 .qual-table th.qual-col { min-width: 64px; text-align: center; white-space: nowrap; }
