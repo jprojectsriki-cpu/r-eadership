@@ -231,8 +231,11 @@
         cb.addEventListener('change', function () { if (cb.checked) selected.add(s.id); else selected.delete(s.id); drawList(); });
         return el('td', { class: 'col-check' }, [cb]);
     }
+    // 名前のセル：幅を決めて、入りきらないときは「…」で省略する（マウスを乗せると全部見える）
     function nameCell(s) {
-        return el('td', { class: 'cell-main cell-student', 'data-label': '名前' }, [el('span', { class: 'st-name', text: s.name }), s.kana ? el('span', { class: 'kana', text: s.kana }) : null]);
+        return el('td', { class: 'cell-main cell-student', 'data-label': '名前', title: s.name + (s.kana ? '（' + s.kana + '）' : '') }, [
+            el('div', { class: 'name-clip' }, [el('span', { class: 'st-name', text: s.name }), s.kana ? el('span', { class: 'kana', text: s.kana }) : null])
+        ]);
     }
 
     function drawList() {
@@ -287,7 +290,7 @@
             rowOf = function (s) {
                 return [
                     el('td', { class: 'cell-mono sticky-col sticky-0', 'data-label': '学籍番号', text: s.studentNo }),
-                    el('td', { class: 'cell-main sticky-col sticky-1', 'data-label': '名前', text: s.name }),
+                    el('td', { class: 'cell-main sticky-col sticky-1', 'data-label': '名前', title: s.name }, [el('div', { class: 'name-clip', text: s.name })]),
                     el('td', { 'data-label': 'クラス' }, [el('span', { class: 'label-tag', text: classText(s.classCode) })]),
                     el('td', { class: 'cell-num', 'data-label': '取得数', text: s.quals.length + '件' })
                 ].concat(qs.map(function (q) {
